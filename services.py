@@ -3,15 +3,14 @@ import json
 from pymongo import MongoClient
 import config as conf
 from datetime import datetime
+from pprint import pprint
 
 class Mongodb:
 
-    coins = requests.get("https://api.coinmarketcap.com/v1/ticker/?limit=10").json()
 
     def __init__(self):
-
+        self.coins = requests.get("https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10").json()
         self.coins = self.cleanJson()
-
         self.db = MongoClient(
                 host = conf.host,
                 username = conf.username,
@@ -24,17 +23,17 @@ class Mongodb:
             print("DB Error: ", str(e))
         finally:
             self.coinList = self.db.coins.find()
+            print(self.coinList)
 
     def cleanJson(self):
         coinList = []
 
-        for coin in self.coins:
+        for coin in self.coins["data"]:
             my_dict = {}
             my_dict['_id'] = coin['id']
             my_dict['name'] = coin['name']
             my_dict['symbol'] = coin['symbol']
             coinList.append(my_dict)
-
         return coinList
 
 
