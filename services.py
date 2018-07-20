@@ -23,7 +23,6 @@ class Mongodb:
             print("DB Error: ", str(e))
         finally:
             self.coinList = self.db.coins.find()
-            print(self.coinList)
 
     def cleanJson(self):
         coinList = []
@@ -42,10 +41,32 @@ class Mongodb:
             symbol = 'IOT'
         return "https://min-api.cryptocompare.com/data/pricemultifull?fsyms="+symbol+"&tsyms=USD", symbol
 
-    def getCoinList(self):
+    def getTop10(self):
         return self.coinList
+    
+    def getCoin(self, symbol):
+        coinObj = self.db.coins.find_one({'symbol': symbol})
+        url, symbol = self.urlGenerator(symbol)
+        req = requests.get(url)
+        data = req.json()
+        if req.status_code == 200 and coinObj:
+            value = data['RAW'][symbol]['USD']['PRICE']
+            update_time = datetime.fromtimestamp(
+                    data['RAW'][symbol]['USD']['LASTUPDATE']
+                    ).strftime("%H:%M:%S")
+            coin = {'name': coinObj['name'],
+                    'symbol': symbol,
+                    'value': str(value),
+                    'time': update_time}
+        else:
+            coin = None
+        return coin
 
-
-
-
-
+    def getData(self, command = None):
+        if "coin" in command:
+            data = self.getCoin(command.split()[1])
+        elif command == "top_10":     
+            data = self.getTop10()
+        else: 
+            data = ""
+        return data
