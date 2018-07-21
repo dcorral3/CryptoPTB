@@ -1,9 +1,8 @@
-#! /bin/python3
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 from config import TOKEN
-from controller import Controller 
+from controller import Controller
 
-updater    = Updater(token=TOKEN)
+updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
 controller = Controller()
 
