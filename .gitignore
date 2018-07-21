@@ -3,3 +3,7 @@
 /__pycache__/
 nohup.out
 *ip_file
+
+*.iml
+
+\.idea/
