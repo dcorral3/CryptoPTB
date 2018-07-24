@@ -2,67 +2,56 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 class View:
-    back_to_start_button = [InlineKeyboardButton("<< Back to Main menu", callback_data='start')]
-    back_to_top_10 = [InlineKeyboardButton(text='<< Back to Top 10', callback_data='top_10')]
-    back_to_wallet = [InlineKeyboardButton(text='<< Back to Wallet', callback_data='wallet')]
-
+    back_buttons = {
+        "start"  : [InlineKeyboardButton("<< Back to Main menu", callback_data='start')],
+        "top_10" : [InlineKeyboardButton(text='<< Back to Top 10', callback_data='top_10')],
+        "wallet" : [InlineKeyboardButton(text='<< Back to Wallet', callback_data='wallet')]
+    }
+    
     def __init__(self):
         self.keyboard = [[InlineKeyboardButton("Wallet", callback_data='wallet'),
-                          InlineKeyboardButton("Top 10", callback_data='top_10')],
-                         [InlineKeyboardButton("Add coin", callback_data='add_coin')]]
-        print("view loaded")
+                          InlineKeyboardButton("Top 10", callback_data='top_10')]]
 
-    def getView(self, command=None, data=None):
-        if command == 'start':
-            keyb = InlineKeyboardMarkup(self.keyboard)
-            text = "Main menu:"
-        elif command == 'wallet':
-            keyb = self.keyboardGenerator(command, 2, command, cursor=data)
-            text = "Wallet:"
-        elif command == "top_10":
-            keyb = self.keyboardGenerator(command, 2, command, cursor=data)
-            text = "Top 10 coins:"
-        elif "coin" in command:
-            symbol = command.split()[1]
-            from_view = command.split()[2]
-            keyb = self.coinMainKeyboard(symbol, from_view)
-            text = self.coinMainTxt(data)
+    def getStart(self):
+        keyb = InlineKeyboardMarkup(self.keyboard)
+        text = "Main Menu"
+        return {"keyboard": keyb, "text": text}
+
+    def getWallet(self, command='wallet', data=None):
+        if len(data) > 3:
+            keyb = self.keyboardGenerator(columns=2, command=command, myList=data)
         else:
-            text = ""
-            keyb = ""
-        return text, keyb
+            keyb = self.keyboardGenerator(columns=1, command=command, myList=data)
+        text = "Wallet:"
+        return {"keyboard": keyb, "text": text}
 
-    def keyboardGenerator(self, from_view, columns=1, command=None, cursor=None):
+
+    def getTop10(self, command='top_10', data=None):
+        keyb = self.keyboardGenerator(columns=2, command=command, myList=data)
+        text = "Top 10 coins:"
+        return {"keyboard": keyb, "text": text}
+ 
+    def getCoin(self, from_view='wallet', coin=None):
         inline_key = []
-        if cursor:
-            for i in range(0, cursor.count(), columns):
-                raw_buttons = []
-                if (cursor.count() - i) < columns:
-                    columns = cursor.count() - i
-                for c in range(0, columns, 1):
-                    raw_buttons.append(InlineKeyboardButton(text=cursor[i + c]['name'],
-                                                            callback_data='coin '
-                                                                          + cursor[i + c]['symbol'] + ' '
-                                                                          + from_view))
-                inline_key.append(raw_buttons)
-            if command == 'top_10' or command == 'wallet':
-                inline_key.append(self.back_to_start_button)
-            return InlineKeyboardMarkup(inline_keyboard=inline_key)
-        else:
-            print("no cursor")
-            return ""
+        inline_key.append([InlineKeyboardButton(text='Update', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
+        inline_key.append(self.back_buttons[from_view])
+        keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
+        text = coin['name'] + ': ' + '     ' + coin['value'] + ' USD\n' + coin['time']
+        return {"keyboard": keyb, "text": text}
 
-    def coinMainKeyboard(self, symbol, from_view):
-        print(symbol)
+    def keyboardGenerator(self, columns=1, command=None, myList=None):
         inline_key = []
-        inline_key.append([InlineKeyboardButton(text='Update', callback_data='coin ' + str(symbol) + ' update')])
-
-        if from_view == 'top_10':
-            inline_key.append(self.back_to_top_10)
-        elif from_view == 'wallet':
-            inline_key.append(self.back_to_wallet)
-
+        for i in range(0, len(myList), columns):
+            raw_buttons = []
+            if (len(myList) - i) < columns:
+                columns = len(myList) - i
+            for c in range(0, columns, 1):
+                raw_buttons.append(InlineKeyboardButton(text=myList[i + c]['name'],
+                                                        callback_data='coin '
+                                                                        + myList[i + c]['symbol'] + ' '
+                                                                        + command))
+            inline_key.append(raw_buttons)
+        if command == 'top_10' or command == 'wallet':
+            inline_key.append(self.back_buttons["start"])
         return InlineKeyboardMarkup(inline_keyboard=inline_key)
 
-    def coinMainTxt(self, coin):
-        return coin['name'] + ': ' + '     ' + coin['value'] + ' USD\n' + coin['time']

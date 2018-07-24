@@ -9,8 +9,8 @@ from pprint import pprint
 class Mongodb:
 
     def __init__(self):
-        self.coins = requests.get("https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10").json()
-        self.coins = self.cleanJson()
+        self.coinsTop10 = requests.get("https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10").json()
+        self.coinsTop10 = self.cleanJson(self.coinsTop10["data"])
         self.db = MongoClient(
             host=conf.host,
             username=conf.username,
@@ -18,32 +18,30 @@ class Mongodb:
             authSource=conf.authSource
         )[conf.authSource]
         try:
-            self.db.coins.insert(self.coins)
+            self.db.coinsTop10.insert(self.coinsTop10)
         except Exception as e:
             print("DB Error: ", str(e))
         finally:
-            self.coinList = self.db.coins.find()
+            self.coinList = list(self.db.coinsTop10.find())
 
-    def cleanJson(self):
+    def cleanJson(self, coins=None):
         coinList = []
-
-        for coin in self.coins["data"]:
+        for coin in coins:
             my_dict = {'_id': coin['id'], 'name': coin['name'], 'symbol': coin['symbol']}
             coinList.append(my_dict)
         return coinList
 
-    def get_user_from_db(self, user_id):
-        result = self.db.users.find_one({"_id": user_id})
-        return result
 
-    def insert_user_in_db(self, user_id, wallet):
-        user = {"_id": user_id, "wallet": wallet}
+    def get_user_id(self, user_id):
+        return self.db.users.find({"_id": user_id}, {"wallet": 0})
+
+    def insert_user(self, user_id, wallet):
+        user = {"_id": user_id, 'wallet': wallet}
         self.db.users.insert(user)
         print("user inserted in DB")
 
-    def update_user_in_db(self, user_id, coin):
-        self.db.users.update_one({'_id': user_id},
-                                 {'$push': {'wallet': coin}})
+    def add_coin_to_user(self, user_id, coin):
+        self.db.users.update_one({'_id': user_id}, {'$addToSet': {'wallet': coin}}, upsert=True)
         print("user updated in DB")
 
     def urlGenerator(self, symbol):
@@ -53,9 +51,14 @@ class Mongodb:
 
     def getTop10(self):
         return self.coinList
+    
+    def getWallet(self, user_id=None):
+        data = self.db.users.find({"_id": user_id}, {"_id": 0})
+        data = data[0]["wallet"]
+        return data
 
     def getCoin(self, symbol):
-        coinObj = self.db.coins.find_one({'symbol': symbol})
+        coinObj = self.db.coinsTop10.find_one({'symbol': symbol})
         url, symbol = self.urlGenerator(symbol)
         req = requests.get(url)
         data = req.json()
@@ -71,12 +74,3 @@ class Mongodb:
         else:
             coin = None
         return coin
-
-    def getData(self, command=None):
-        if "coin" in command:
-            data = self.getCoin(command.split()[1])
-        elif command == "top_10":
-            data = self.getTop10()
-        else:
-            data = ""
-        return data
