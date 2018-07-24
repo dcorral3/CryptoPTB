@@ -57,7 +57,7 @@ class Controller:
         else:
             data = ""
 
-        if oldText is not view['text']:
+        if oldText != view['text']:
             bot.edit_message_text(text=view["text"], chat_id=user_id,
                               message_id=query.message.message_id, reply_markup=view["keyboard"])
         bot.answer_callback_query(query.id)
