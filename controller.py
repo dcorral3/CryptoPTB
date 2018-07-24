@@ -52,6 +52,8 @@ class Controller:
             view = self.view.get_wallet(command=command, data=data)
         elif command == "start":
             view = self.view.get_start()
+        elif command == "add":
+            view = self.view.get_add_coin()
         else:
             data = ""
 

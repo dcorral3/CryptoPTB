@@ -7,6 +7,7 @@ class View:
         "top_10": [InlineKeyboardButton(text='<< Back to Top 10', callback_data='top_10')],
         "wallet": [InlineKeyboardButton(text='<< Back to Wallet', callback_data='wallet')]
     }
+    add_coin_button = [InlineKeyboardButton("Add coin", callback_data='add')]
 
     def __init__(self):
         self.keyboard = [[InlineKeyboardButton("Wallet", callback_data='wallet'),
@@ -19,14 +20,8 @@ class View:
 
     def get_wallet(self, command='wallet', data=None):
         if len(data) > 3:
-            print(str(len(data)))
-            print(str(command))
-            print(str(data))
             keyb = self.keyboard_generator(columns=2, command=command, myList=data)
         else:
-            print(str(len(data)))
-            print(str(command))
-            print(str(data))
             keyb = self.keyboard_generator(columns=1, command=command, myList=data)
         text = "Wallet:"
         return {"keyboard": keyb, "text": text}
@@ -45,6 +40,12 @@ class View:
         text = coin['name'] + ': ' + '     ' + coin['value'] + ' USD\n' + coin['time']
         return {"keyboard": keyb, "text": text}
 
+    def get_add_coin(self):
+        text = 'Send me the coin short name, please. (e.j: BTC)'
+        inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='wallet')]]
+        keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
+        return {"keyboard": keyb, "text": text}
+
     def keyboard_generator(self, columns=1, command=None, myList=None):
         inline_key = []
         for i in range(0, len(myList), columns):
@@ -57,6 +58,10 @@ class View:
                                                                       + myList[i + c]['symbol'] + ' '
                                                                       + command))
             inline_key.append(raw_buttons)
-        if command == 'top_10' or command == 'wallet':
+        if command == 'top_10':
+            inline_key.append(self.back_buttons["start"])
+        elif command == 'wallet':
+            inline_key.append(self.add_coin_button)
             inline_key.append(self.back_buttons["start"])
         return InlineKeyboardMarkup(inline_keyboard=inline_key)
+
