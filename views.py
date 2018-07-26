@@ -7,11 +7,11 @@ class viewObject:
 
 class View:
     back_buttons = {
-        "start": [InlineKeyboardButton("<< Back to Main menu", callback_data='start')],
+        "start": [InlineKeyboardButton(text="<< Back to Main menu", callback_data='start')],
         "top_10": [InlineKeyboardButton(text='<< Back to Top 10', callback_data='top_10')],
         "wallet": [InlineKeyboardButton(text='<< Back to Wallet', callback_data='wallet')]
     }
-    add_coin_button = [InlineKeyboardButton("Add coin", callback_data='add_coin')]
+    add_coin_button = [InlineKeyboardButton(text="Add coin", callback_data='add_coin')]
 
     def __init__(self):
         self.keyboard = [[InlineKeyboardButton("Wallet", callback_data='wallet'),
@@ -37,8 +37,10 @@ class View:
 
     def get_coin(self, from_view='wallet', coin=None):
         inline_key = []
-        inline_key.append(
-            [InlineKeyboardButton(text='Update', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
+        inline_key.append([InlineKeyboardButton(text='Update', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
+        # añade opcion remover solo si estas en wallet
+        if from_view == "wallet":
+            inline_key[0].append(InlineKeyboardButton(text="Remove coin", callback_data="remove_coin "+ str(coin['symbol'])))
         inline_key.append(self.back_buttons[from_view])
         keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = coin['name'] + ': ' + '     ' + coin['value'] + ' USD\n' + coin['time']

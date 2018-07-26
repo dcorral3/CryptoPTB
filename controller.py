@@ -7,47 +7,30 @@ class Controller:
     def __init__(self):
         self.view = View()
         self.mongo = Mongodb()
-    
-    # Commands 
+
+    # Commands
     def start(self, bot, update):
         view = self.view.get_start()
         user = self.mongo.get_user_id(update.message.chat_id)
         if not user:
             self.mongo.insert_user(update.message.chat_id, [])
         update.message.reply_text(view.text, reply_markup=view.keyboard)
-    
-    def add_coin(self, bot, update):
-        coin = {
-            "_id": 1,
-            "name": "Bitcoin",
-            "symbol": "BTC" 
-        }
-        try:
-            user = self.mongo.get_user_id(update.message.chat_id).next()
-            if not user:
-                self.mongo.insert_user(update.message.chat_id, [])
-            self.mongo.add_coin_to_user(user["_id"], coin)
-            data = self.mongo.get_wallet(user["_id"])
-        except Exception as e:
-            print("DB Error: ", str(e))
-        view = self.view.get_wallet(command='wallet', data=data)
-        update.message.reply_text(view.text, reply_markup=view.keyboard)
-    
+
     def textMessages(self, bot, update):
         user_id = update.message.chat_id
         if self.mongo.is_add_coin(user_id=user_id):
-            symbol = update.message.text
+            symbol = update.message.text.upper()
             try:
                 self.mongo.add_coin_to_user(user_id, symbol)
-                data = self.mongo.get_wallet(user_id) 
+                data = self.mongo.get_wallet(user_id)
                 view = self.view.get_wallet(command="wallet", data=data)
                 self.mongo.update_context(user_id=user_id)
             except Exception as e:
                 print(str(e))
 
-        else:    
+        else:
             view = self.view.get_help()
-        
+
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
     # Buttons
@@ -61,14 +44,20 @@ class Controller:
                 self.mongo.update_context(user_id, command)
                 view = self.view.get_add_coin()
             elif "cancel" in command:
-                print(command)
                 command = command.split()
                 self.mongo.update_context(command=command[2], user_id=user_id)
                 if command[1] == 'wallet':
                     data = self.mongo.get_wallet(user_id)
-                    view = self.view.get_wallet(command=command[1], data=data)
+                    view = self.view.get_wallet(data=data)
                 else:
                     view = None
+            elif "remove" in command:
+                command = command.split()
+                symbol = command[1]
+                coin = self.mongo.get_db_coin(symbol)
+                self.mongo.remove_coin(user_id=user_id, coin=coin)
+                data = self.mongo.get_wallet(user_id)
+                view = self.view.get_wallet(data=data)
             else:
                 command = command.split()
                 coin_symbol = command[1]

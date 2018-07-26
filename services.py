@@ -65,12 +65,14 @@ class Mongodb:
         data = data[0]["wallet"]
         return data
 
+    def get_db_coin(self, symbol):
+        return self.db.coins.find_one({"symbol": symbol})
+
     def get_coin(self, symbol):
         coinObj = self.db.coins.find_one({'symbol': symbol})
         url, symbol = self.url_generator(coin=coinObj)
         req = requests.get(url)
         data = req.json()["data"]
-        print(data)
         if req.status_code == 200 and coinObj:
             value = data['quotes']['USD']['price']
             update_time = datetime.fromtimestamp(
@@ -87,7 +89,8 @@ class Mongodb:
     def url_generator(self, coin=None):
         return "https://api.coinmarketcap.com/v2/ticker/"+str(coin["id"]), coin["symbol"]
 
-
+    def remove_coin(self, user_id=None, coin=None):
+        self.db.users.update_one({'_id': user_id},{'$pull': {'wallet': coin}})
 
     # Context utils
     def update_context(self, user_id=None, command=None):
