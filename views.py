@@ -1,5 +1,9 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+class viewObject:
+    def __init__(self, text=None, keyboard=None):
+        self.text = text
+        self.keyboard = keyboard
 
 class View:
     back_buttons = {
@@ -7,7 +11,7 @@ class View:
         "top_10": [InlineKeyboardButton(text='<< Back to Top 10', callback_data='top_10')],
         "wallet": [InlineKeyboardButton(text='<< Back to Wallet', callback_data='wallet')]
     }
-    add_coin_button = [InlineKeyboardButton("Add coin", callback_data='add')]
+    add_coin_button = [InlineKeyboardButton("Add coin", callback_data='add_coin')]
 
     def __init__(self):
         self.keyboard = [[InlineKeyboardButton("Wallet", callback_data='wallet'),
@@ -16,7 +20,7 @@ class View:
     def get_start(self):
         keyb = InlineKeyboardMarkup(self.keyboard)
         text = "Main Menu"
-        return {"keyboard": keyb, "text": text}
+        return viewObject(text=text, keyboard=keyb)
 
     def get_wallet(self, command='wallet', data=None):
         if len(data) > 3:
@@ -24,12 +28,12 @@ class View:
         else:
             keyb = self.keyboard_generator(columns=1, command=command, myList=data)
         text = "Wallet:"
-        return {"keyboard": keyb, "text": text}
+        return viewObject(text=text, keyboard=keyb)
 
     def get_top_10(self, command='top_10', data=None):
         keyb = self.keyboard_generator(columns=2, command=command, myList=data)
         text = "Top 10 coins:"
-        return {"keyboard": keyb, "text": text}
+        return viewObject(text=text, keyboard=keyb)
 
     def get_coin(self, from_view='wallet', coin=None):
         inline_key = []
@@ -38,13 +42,13 @@ class View:
         inline_key.append(self.back_buttons[from_view])
         keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = coin['name'] + ': ' + '     ' + coin['value'] + ' USD\n' + coin['time']
-        return {"keyboard": keyb, "text": text}
+        return viewObject(text=text, keyboard=keyb)
 
     def get_add_coin(self):
         text = 'Send me the coin short name, please. (e.j: BTC)'
-        inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='wallet')]]
+        inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel wallet add_coin')]]
         keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        return {"keyboard": keyb, "text": text}
+        return viewObject(text=text, keyboard=keyb)
 
     def keyboard_generator(self, columns=1, command=None, myList=None):
         inline_key = []
@@ -65,3 +69,5 @@ class View:
             inline_key.append(self.back_buttons["start"])
         return InlineKeyboardMarkup(inline_keyboard=inline_key)
 
+    def get_help(self):
+        return viewObject(text="help")

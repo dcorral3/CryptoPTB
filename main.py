@@ -1,4 +1,4 @@
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 from config import TOKEN
 from controller import Controller
 
@@ -9,10 +9,10 @@ controller = Controller()
 start_handler = CommandHandler('start', controller.start)
 dispatcher.add_handler(start_handler)
 
-add_coin_handler = CommandHandler('add_coin', controller.add_coin)
-dispatcher.add_handler(add_coin_handler)
-
 button_handler = CallbackQueryHandler(controller.button)
 dispatcher.add_handler(button_handler)
+
+text_handler = MessageHandler(Filters.text, controller.textMessages)
+dispatcher.add_handler(text_handler)
 
 updater.start_polling()

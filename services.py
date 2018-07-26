@@ -13,13 +13,6 @@ def clean_top_10_json(coins=None):
         coinList.append(my_dict)
     return coinList
 
-
-def url_generator(symbol):
-    if symbol == 'MIOTA':
-        symbol = 'IOT'
-    return "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=" + symbol + "&tsyms=USD", symbol
-
-
 class Mongodb:
 
     def __init__(self):
@@ -48,14 +41,16 @@ class Mongodb:
             self.coinList = list(self.db.coins.find())
 
     def get_user_id(self, user_id):
-        return self.db.users.find({"_id": user_id}, {"wallet": 0})
+        return self.db.users.find_one({"_id": user_id})
 
     def insert_user(self, user_id, wallet):
-        user = {"_id": user_id, 'wallet': wallet}
+        context = {"add_coin": False, "search_coin": False}
+        user = {"_id": user_id, 'wallet': wallet, "context": context}
         self.db.users.insert(user)
         print("user inserted in DB")
 
-    def add_coin_to_user(self, user_id, coin):
+    def add_coin_to_user(self, user_id=None, symbol=None):
+        coin = self.db.coins.find_one({"symbol": symbol})
         self.db.users.update_one({'_id': user_id}, {'$addToSet': {'wallet': coin}}, upsert=True)
         print("user updated in DB")
 
@@ -71,14 +66,15 @@ class Mongodb:
         return data
 
     def get_coin(self, symbol):
-        coinObj = self.db.coinsTop10.find_one({'symbol': symbol})
-        url, symbol = url_generator(symbol)
+        coinObj = self.db.coins.find_one({'symbol': symbol})
+        url, symbol = self.url_generator(coin=coinObj)
         req = requests.get(url)
-        data = req.json()
+        data = req.json()["data"]
+        print(data)
         if req.status_code == 200 and coinObj:
-            value = data['RAW'][symbol]['USD']['PRICE']
+            value = data['quotes']['USD']['price']
             update_time = datetime.fromtimestamp(
-                data['RAW'][symbol]['USD']['LASTUPDATE']
+                data['last_updated']
             ).strftime("%H:%M:%S")
             coin = {'name': coinObj['name'],
                     'symbol': symbol,
@@ -87,3 +83,28 @@ class Mongodb:
         else:
             coin = None
         return coin
+
+    def url_generator(self, coin=None):
+        return "https://api.coinmarketcap.com/v2/ticker/"+str(coin["id"]), coin["symbol"]
+
+
+
+    # Context utils
+    def update_context(self, user_id=None, command=None):
+        user = self.db.users.find_one({"_id": user_id})
+        context = user["context"]
+        if command:
+            if command == "add_coin":
+                self.db.users.update_one({"_id": user_id}, {"$set": {"context.add_coin": not context[command]}})
+            elif command == "search_coin":
+                self.db.users.update_one({"_id": user_id}, {"$set": {"context.search_coin": not context[command]}})
+            else:
+                print("update context error")
+        else:
+            self.db.users.update_one({"_id": user_id}, {"$set": {"context.add_coin": False}})
+            self.db.users.update_one({"_id": user_id}, {"$set": {"context.search_coin": False}})
+
+
+
+    def is_add_coin(self, user_id=None):
+        return self.db.users.find_one({"_id": user_id})["context"]["add_coin"]
