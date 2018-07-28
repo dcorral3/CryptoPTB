@@ -12,7 +12,7 @@ dispatcher.add_handler(start_handler)
 button_handler = CallbackQueryHandler(controller.button)
 dispatcher.add_handler(button_handler)
 
-text_handler = MessageHandler(Filters.text, controller.textMessages)
+text_handler = MessageHandler(Filters.text, controller.text_messages)
 dispatcher.add_handler(text_handler)
 
 updater.start_polling()

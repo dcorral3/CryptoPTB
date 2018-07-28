@@ -2,6 +2,17 @@ from views import View
 from services import Mongodb
 
 
+def clean_wallet(wallet):
+    new_wallet = []
+    for coin in wallet:
+        if 'id' in coin:
+            my_dict = {'id': coin['id'], 'name': coin['name'], 'symbol': coin['symbol']}
+            new_wallet.append(my_dict)
+        else:
+            new_wallet.append(coin)
+    return new_wallet
+
+
 class Controller:
 
     def __init__(self):
@@ -13,25 +24,50 @@ class Controller:
         view = self.view.get_start()
         user = self.mongo.get_user_id(update.message.chat_id)
         if not user:
-            self.mongo.insert_user(update.message.chat_id, [])
+            wallet = []
+        else:
+            wallet = user["wallet"]
+            wallet = clean_wallet(wallet)
+
+        self.mongo.insert_or_update_user(update.message.chat_id, wallet)
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
-    def textMessages(self, bot, update):
+    def text_messages(self, bot, update):
         user_id = update.message.chat_id
+
         if self.mongo.is_add_coin(user_id=user_id):
             symbol = update.message.text.upper()
             try:
-                self.mongo.add_coin_to_user(user_id, symbol)
-                data = self.mongo.get_wallet(user_id)
-                view = self.view.get_wallet(command="wallet", data=data)
-                self.mongo.update_context(user_id=user_id)
+                if self.mongo.coin_exist(symbol):
+                    coin = self.mongo.get_db_coin(symbol)
+                    self.mongo.add_coin_to_user(user_id, coin)
+                    data = self.mongo.get_wallet(user_id)
+                    view = self.view.get_wallet(command="wallet", data=data)
+                else:
+                    view = self.view.get_search_error()
+                self.mongo.update_context(user_id, "add_coin")
+                update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:
+                print("EXCEPTION ADDING COIN")
+                print(str(e))
+
+        elif self.mongo.is_search(user_id=user_id):
+            symbol = update.message.text.upper()
+            try:
+                if self.mongo.coin_exist(symbol):
+                    data = self.mongo.get_coin(symbol)
+                    view = self.view.get_coin("start", data)
+                else:
+                    view = self.view.get_search_error()
+                self.mongo.update_context(user_id, "search_coin")
+                update.message.reply_text(view.text, reply_markup=view.keyboard)
+            except Exception as e:
+                print("EXCEPTION SEARCHING")
                 print(str(e))
 
         else:
             view = self.view.get_help()
-
-        update.message.reply_text(view.text, reply_markup=view.keyboard)
+            update.message.reply_text(view.text, reply_markup=view.keyboard)
 
     # Buttons
     def button(self, bot, update):
@@ -58,6 +94,9 @@ class Controller:
                 self.mongo.remove_coin(user_id=user_id, coin=coin)
                 data = self.mongo.get_wallet(user_id)
                 view = self.view.get_wallet(data=data)
+            elif "search" in command:
+                self.mongo.update_context(user_id, command)
+                view = self.view.get_search()
             else:
                 command = command.split()
                 coin_symbol = command[1]
@@ -70,12 +109,12 @@ class Controller:
         elif command == "wallet":
             data = self.mongo.get_wallet(user_id)
             view = self.view.get_wallet(command=command, data=data)
-        elif command == "start":
+        elif command == "start" or "cancel_search":
             view = self.view.get_start()
         else:
             data = ""
 
         if oldText != view.text:
             bot.edit_message_text(text=view.text, chat_id=user_id,
-                              message_id=query.message.message_id, reply_markup=view.keyboard)
+                                  message_id=query.message.message_id, reply_markup=view.keyboard)
         bot.answer_callback_query(query.id)

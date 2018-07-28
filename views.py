@@ -15,7 +15,8 @@ class View:
 
     def __init__(self):
         self.keyboard = [[InlineKeyboardButton("Wallet", callback_data='wallet'),
-                          InlineKeyboardButton("Top 10", callback_data='top_10')]]
+                          InlineKeyboardButton("Top 10", callback_data='top_10'),
+                          InlineKeyboardButton("Search coin", callback_data='search_coin')]]
 
     def get_start(self):
         keyb = InlineKeyboardMarkup(self.keyboard)
@@ -35,12 +36,25 @@ class View:
         text = "Top 10 coins:"
         return viewObject(text=text, keyboard=keyb)
 
+    def get_search(self):
+        text = 'Send me the coin short name, please. (e.j: BTC)'
+        inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
+        keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
+        return viewObject(text=text, keyboard=keyb)
+
+    def get_search_error(self):
+        text = '⚠️ Oops! I cant find this coin.'
+        inline_key = [[InlineKeyboardButton(text='Retry', callback_data='search_coin')],
+                      [InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
+        keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
+        return viewObject(text=text, keyboard=keyb)
+
     def get_coin(self, from_view='wallet', coin=None):
         inline_key = []
         inline_key.append([InlineKeyboardButton(text='Update', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
         # añade opcion remover solo si estas en wallet
         if from_view == "wallet":
-            inline_key[0].append(InlineKeyboardButton(text="Remove coin", callback_data="remove_coin "+ str(coin['symbol'])))
+            inline_key[0].append(InlineKeyboardButton(text="Remove coin", callback_data="remove_coin " + str(coin['symbol'])))
         inline_key.append(self.back_buttons[from_view])
         keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = coin['name'] + ': ' + '     ' + coin['value'] + ' USD\n' + coin['time']
