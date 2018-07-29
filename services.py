@@ -90,13 +90,19 @@ class Mongodb:
         data = req.json()["data"]
         if req.status_code == 200 and coin_obj:
             value = data['quotes']['USD']['price']
+            percent_change_1h = data['quotes']['USD']['percent_change_1h']
+            percent_change_24h = data['quotes']['USD']['percent_change_24h']
+            percent_change_7d = data['quotes']['USD']['percent_change_7d']
             update_time = datetime.fromtimestamp(
                 data['last_updated']
             ).strftime("%H:%M:%S")
             coin = {'name': coin_obj['name'],
                     'symbol': symbol,
                     'value': str(value),
-                    'time': update_time}
+                    'time': update_time,
+                    'percent_change_1h': percent_change_1h,
+                    'percent_change_24h': percent_change_24h,
+                    'percent_change_7d': percent_change_7d}
         else:
             coin = None
         return coin

@@ -1,3 +1,4 @@
+# coding=utf-8
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 class viewObject:
@@ -52,12 +53,40 @@ class View:
     def get_coin(self, from_view='wallet', coin=None):
         inline_key = []
         inline_key.append([InlineKeyboardButton(text='Update', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
+
         # añade opcion remover solo si estas en wallet
         if from_view == "wallet":
             inline_key[0].append(InlineKeyboardButton(text="Remove coin", callback_data="remove_coin " + str(coin['symbol'])))
         inline_key.append(self.back_buttons[from_view])
         keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        text = coin['name'] + ': ' + '     ' + coin['value'] + ' USD\n' + coin['time']
+
+        positive_icon = '🔺'
+        negative_icon = '🔻'
+
+        last_1h = coin['percent_change_1h']
+        if last_1h < 0:
+            last_1h_icon = negative_icon
+        else:
+            last_1h_icon = positive_icon
+
+        last_24h = coin['percent_change_24h']
+
+        if last_24h < 0:
+            last_24h_icon = negative_icon
+        else:
+            last_24h_icon = positive_icon
+
+        last_week = coin['percent_change_7d']
+        if last_week < 0:
+            last_week_icon = negative_icon
+        else:
+            last_week_icon = positive_icon
+
+        text = coin['name'] + ':\t' + coin['value'] + ' USD\n\n' \
+               + 'Last hour: ' + str(last_1h) + last_1h_icon + '\n' \
+               + 'Last 24 hour: ' + str(last_24h) + last_24h_icon + '\n' \
+               + 'Last week: ' + str(last_week) + last_week_icon + '\n\n' \
+               + 'Last update: ' + coin['time']
         return viewObject(text=text, keyboard=keyb)
 
     def get_add_coin(self):
