@@ -44,7 +44,7 @@ class Controller:
                     data = self.mongo.get_wallet(user_id)
                     view = self.view.get_wallet(command="wallet", data=data)
                 else:
-                    view = self.view.get_search_error()
+                    view = self.view.get_search_error(command="add_coin")
                 self.mongo.update_context(user_id, "add_coin")
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:
@@ -58,7 +58,7 @@ class Controller:
                     data = self.mongo.get_coin(symbol)
                     view = self.view.get_coin("start", data)
                 else:
-                    view = self.view.get_search_error()
+                    view = self.view.get_search_error(command="search_coin")
                 self.mongo.update_context(user_id, "search_coin")
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:

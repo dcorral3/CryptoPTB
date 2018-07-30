@@ -59,10 +59,7 @@ class Mongodb:
         print("user inserted in DB")
 
     def coin_exist(self, symbol=None):
-        if self.db.coins.find_one({"symbol": symbol}) is not None:
-            return True
-        else:
-            return False
+        return self.db.coins.find_one({"symbol": symbol})
 
     def add_coin_to_user(self, user_id=None, coin=None):
         #coin = self.db.coins.find_one({"symbol": symbol})

@@ -43,9 +43,9 @@ class View:
         keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         return viewObject(text=text, keyboard=keyb)
 
-    def get_search_error(self):
+    def get_search_error(self, command=None):
         text = '⚠️ Oops! I cant find this coin.'
-        inline_key = [[InlineKeyboardButton(text='Retry', callback_data='search_coin')],
+        inline_key = [[InlineKeyboardButton(text='Retry', callback_data=command)],
                       [InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
         keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         return viewObject(text=text, keyboard=keyb)
@@ -83,9 +83,9 @@ class View:
             last_week_icon = positive_icon
 
         text = coin['name'] + ':\t' + coin['value'] + ' USD\n\n' \
-               + 'Last hour: ' + str(last_1h) + last_1h_icon + '\n' \
-               + 'Last 24 hour: ' + str(last_24h) + last_24h_icon + '\n' \
-               + 'Last week: ' + str(last_week) + last_week_icon + '\n\n' \
+               + 'Last hour: ' + str(last_1h) + "%" + last_1h_icon + '\n' \
+               + 'Last 24 hour: ' + str(last_24h) + "%" + last_24h_icon + '\n' \
+               + 'Last week: ' + str(last_week) + "%" + last_week_icon + '\n\n' \
                + 'Last update: ' + coin['time']
         return viewObject(text=text, keyboard=keyb)
 
