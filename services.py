@@ -15,7 +15,9 @@ def clean_top_10_json(coins=None):
 
 
 def url_generator(coin=None):
-    return "https://api.coinmarketcap.com/v2/ticker/" + str(coin["_id"]), coin["symbol"]
+    # https://api.coinmarketcap.com/v2/ticker/1/?convert=EUR
+    url = "https://api.coinmarketcap.com/v2/ticker/" + str(coin["_id"]) + "/?convert=EUR"
+    return url, coin["symbol"]
 
 
 class Mongodb:
@@ -80,13 +82,18 @@ class Mongodb:
     def get_db_coin(self, symbol):
         return self.db.coins.find_one({"symbol": symbol})
 
-    def get_coin(self, symbol):
+    def get_coin(self, symbol, settings):
         coin_obj = self.db.coins.find_one({'symbol': symbol})
         url, symbol = url_generator(coin=coin_obj)
+        print(str(url))
         req = requests.get(url)
+        print(str(req))
         data = req.json()["data"]
         if req.status_code == 200 and coin_obj:
-            value = data['quotes']['USD']['price']
+            if settings['currency'] == 'EUR':
+                value = data['quotes']['EUR']['price']
+            else:
+                value = data['quotes']['USD']['price']
             percent_change_1h = data['quotes']['USD']['percent_change_1h']
             percent_change_24h = data['quotes']['USD']['percent_change_24h']
             percent_change_7d = data['quotes']['USD']['percent_change_7d']

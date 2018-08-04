@@ -21,7 +21,9 @@ class Controller:
 
     # Commands
     def start(self, bot, update):
-        view = self.view.get_start()
+        user_id = update.message.chat_id
+        settings = self.mongo.get_user_settings(user_id)
+        view = self.view.get_start(settings)
         user = self.mongo.get_user_id(update.message.chat_id)
 
         if not user:
@@ -40,6 +42,7 @@ class Controller:
 
     def text_messages(self, bot, update):
         user_id = update.message.chat_id
+        settings = self.mongo.get_user_settings(user_id)
 
         if self.mongo.is_add_coin(user_id=user_id):
             symbol = update.message.text.upper()
@@ -48,9 +51,9 @@ class Controller:
                     coin = self.mongo.get_db_coin(symbol)
                     self.mongo.add_coin_to_user(user_id, coin)
                     data = self.mongo.get_wallet(user_id)
-                    view = self.view.get_wallet(command="wallet", data=data)
+                    view = self.view.get_wallet(command="wallet", data=data, settings=settings)
                 else:
-                    view = self.view.get_search_error(command="add_coin")
+                    view = self.view.get_search_error(command="add_coin", settings=settings)
                 self.mongo.update_context(user_id, "add_coin")
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:
@@ -61,10 +64,10 @@ class Controller:
             symbol = update.message.text.upper()
             try:
                 if self.mongo.coin_exist(symbol):
-                    data = self.mongo.get_coin(symbol)
-                    view = self.view.get_coin("start", data)
+                    data = self.mongo.get_coin(symbol, settings)
+                    view = self.view.get_coin("start", data, settings)
                 else:
-                    view = self.view.get_search_error(command="search_coin")
+                    view = self.view.get_search_error(command="search_coin", settings=settings)
                 self.mongo.update_context(user_id, "search_coin")
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:
@@ -81,16 +84,18 @@ class Controller:
         command = query.data
         user_id = query.message.chat_id
         oldText = query.message.text
+        settings = self.mongo.get_user_settings(user_id)
+
         if "coin" in command:
             if command == "add_coin":
                 self.mongo.update_context(user_id, command)
-                view = self.view.get_add_coin()
+                view = self.view.get_add_coin(settings)
             elif "cancel" in command:
                 command = command.split()
                 self.mongo.update_context(command=command[2], user_id=user_id)
                 if command[1] == 'wallet':
                     data = self.mongo.get_wallet(user_id)
-                    view = self.view.get_wallet(data=data)
+                    view = self.view.get_wallet(data=data, settings=settings)
                 else:
                     view = None
             elif "remove" in command:
@@ -99,38 +104,37 @@ class Controller:
                 coin = self.mongo.get_db_coin(symbol)
                 self.mongo.remove_coin(user_id=user_id, coin=coin)
                 data = self.mongo.get_wallet(user_id)
-                view = self.view.get_wallet(data=data)
+                view = self.view.get_wallet(data=data, settings=settings)
             elif "search" in command:
                 self.mongo.update_context(user_id, command)
-                view = self.view.get_search()
+                view = self.view.get_search(settings)
             else:
                 command = command.split()
                 coin_symbol = command[1]
                 from_view = command[2]
-                data = self.mongo.get_coin(coin_symbol)
-                view = self.view.get_coin(from_view=from_view, coin=data)
+                data = self.mongo.get_coin(coin_symbol, settings)
+                view = self.view.get_coin(from_view=from_view, coin=data, settings=settings)
         elif command == "top_10":
             data = self.mongo.get_top_10()
-            view = self.view.get_top_10(command=command, data=data)
+            view = self.view.get_top_10(command=command, data=data, settings=settings)
         elif command == "wallet":
             data = self.mongo.get_wallet(user_id)
-            view = self.view.get_wallet(command=command, data=data)
+            view = self.view.get_wallet(command=command, data=data, settings=settings)
         elif command == "settings":
-            settings = self.mongo.get_user_settings(user_id)
             view = self.view.get_settings(settings)
         elif command == "language":
-            view = self.view.get_languaje()
+            view = self.view.get_languaje(settings)
         elif command == "currency":
-            view = self.view.get_currency()
+            view = self.view.get_currency(settings)
         elif 'db' in command:
             attribute = command.split()[1]
             value = command.split()[2]
             self.mongo.update_settings(user_id, attribute, value)
             settings = self.mongo.get_user_settings(user_id)
             view = self.view.get_settings(settings)
-
         elif command == "start" or "cancel_search":
-            view = self.view.get_start()
+            settings = self.mongo.get_user_settings(user_id)
+            view = self.view.get_start(settings)
         else:
             data = ""
 
