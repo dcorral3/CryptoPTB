@@ -22,9 +22,7 @@ class Controller:
     # Commands
     def start(self, bot, update):
         user_id = update.message.chat_id
-        settings = self.mongo.get_user_settings(user_id)
-        view = self.view.get_start(settings)
-        user = self.mongo.get_user_id(update.message.chat_id)
+        user = self.mongo.get_user_id(user_id)
 
         if not user:
             wallet = []
@@ -38,6 +36,7 @@ class Controller:
                 settings = user['settings']
 
         self.mongo.insert_or_update_user(update.message.chat_id, wallet, settings)
+        view = self.view.get_start(settings)
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
     def text_messages(self, bot, update):
