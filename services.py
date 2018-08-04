@@ -21,9 +21,9 @@ def url_generator(coin=None):
 class Mongodb:
 
     def __init__(self):
-        self.coinsTop10 = requests.get("https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10").json()
+        self.coinsTop10 = requests.get("https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10").json()["data"]
         self.coins = requests.get("https://api.coinmarketcap.com/v2/listings/").json()["data"]
-        self.coinsTop10 = clean_top_10_json(self.coinsTop10["data"])
+        self.coinsTop10 = clean_top_10_json(self.coinsTop10)
         self.coins = clean_top_10_json(self.coins)
         self.db = MongoClient(
             host=conf.host,
@@ -51,9 +51,9 @@ class Mongodb:
     def get_user_id(self, user_id):
         return self.db.users.find_one({"_id": user_id})
 
-    def insert_or_update_user(self, user_id, wallet):
+    def insert_or_update_user(self, user_id, wallet, settings):
         context = {"add_coin": False, "search_coin": False}
-        user = {"_id": user_id, 'wallet': wallet, "context": context}
+        user = {"_id": user_id, 'wallet': wallet, "context": context, 'settings': settings}
         #self.db.users.insert(user)
         self.db.users.update({'_id': user_id}, user, upsert=True)
         print("user inserted in DB")
@@ -127,3 +127,11 @@ class Mongodb:
 
     def is_search(self, user_id):
         return self.db.users.find_one({"_id": user_id})["context"]["search_coin"]
+
+    def update_settings(self, user_id, attribute, value):
+        self.db.users.update_one({"_id": user_id}, {"$set": {"settings."+str(attribute): str(value)}})
+
+    def get_user_settings(self, user_id):
+        data = self.db.users.find({"_id": user_id}, {"_id": 0})
+        data = data[0]["settings"]
+        return data

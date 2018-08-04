@@ -23,13 +23,19 @@ class Controller:
     def start(self, bot, update):
         view = self.view.get_start()
         user = self.mongo.get_user_id(update.message.chat_id)
+
         if not user:
             wallet = []
+            settings = {'language': 'ENG', 'currency': 'USD'}
         else:
             wallet = user["wallet"]
             wallet = clean_wallet(wallet)
+            if 'settings' not in user:
+                settings = {'language:': 'ENG', 'currency': 'USD'}
+            else:
+                settings = user['settings']
 
-        self.mongo.insert_or_update_user(update.message.chat_id, wallet)
+        self.mongo.insert_or_update_user(update.message.chat_id, wallet, settings)
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
     def text_messages(self, bot, update):
@@ -109,6 +115,20 @@ class Controller:
         elif command == "wallet":
             data = self.mongo.get_wallet(user_id)
             view = self.view.get_wallet(command=command, data=data)
+        elif command == "settings":
+            settings = self.mongo.get_user_settings(user_id)
+            view = self.view.get_settings(settings)
+        elif command == "language":
+            view = self.view.get_languaje()
+        elif command == "currency":
+            view = self.view.get_currency()
+        elif 'db' in command:
+            attribute = command.split()[1]
+            value = command.split()[2]
+            self.mongo.update_settings(user_id, attribute, value)
+            settings = self.mongo.get_user_settings(user_id)
+            view = self.view.get_settings(settings)
+
         elif command == "start" or "cancel_search":
             view = self.view.get_start()
         else:
