@@ -86,16 +86,21 @@ class View:
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         return viewObject(text=text, keyboard=keyb)
 
-    def get_coin(self, from_view='wallet', coin=None, settings=None):
+    def get_coin(self, from_view='wallet', coin=None, settings=None, in_wallet=None):
         inline_key = []
         if settings['language'] == 'ESP':
             inline_key.append(
                 [InlineKeyboardButton(text='Actualizar', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
 
             # añade opcion remover solo si estas en wallet
-            if from_view == "wallet":
+            # if from_view == "wallet":
+            if in_wallet:
                 inline_key[0].append(
-                    InlineKeyboardButton(text="Eliminar moneda", callback_data="remove_coin " + str(coin['symbol'])))
+                    InlineKeyboardButton(text="Eliminar de Wallet", callback_data="remove_coin " + str(coin['symbol'])))
+            else:
+                inline_key[0].append(
+                    InlineKeyboardButton(text="Añadir a Wallet", callback_data="to_wallet " + str(coin['symbol'])))
+
             inline_key.append(self.back_buttons_esp[from_view])
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
 
@@ -133,7 +138,15 @@ class View:
             # añade opcion remover solo si estas en wallet
             if from_view == "wallet":
                 inline_key[0].append(
-                    InlineKeyboardButton(text="Remove coin", callback_data="remove_coin " + str(coin['symbol'])))
+                    InlineKeyboardButton(text="Remove from Wallet", callback_data="remove_coin " + str(coin['symbol'])))
+
+            if in_wallet:
+                inline_key[0].append(
+                    InlineKeyboardButton(text="Remove from Wallet", callback_data="remove_coin " + str(coin['symbol'])))
+            else:
+                inline_key[0].append(
+                    InlineKeyboardButton(text="Add to Wallet", callback_data="to_wallet " + str(coin['symbol'])))
+
             inline_key.append(self.back_buttons[from_view])
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
 

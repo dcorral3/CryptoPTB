@@ -63,8 +63,18 @@ class Controller:
             symbol = update.message.text.upper()
             try:
                 if self.mongo.coin_exist(symbol):
+                    wallet = self.mongo.get_wallet(user_id)
+                    i = 0
+                    in_wallet = False
+                    while i < len(wallet) and in_wallet is False:
+                        if symbol == wallet[i]['symbol']:
+                            in_wallet = True
+                        else:
+                            in_wallet = False
+                        i += 1
+
                     data = self.mongo.get_coin(symbol, settings)
-                    view = self.view.get_coin("start", data, settings)
+                    view = self.view.get_coin("start", data, settings, in_wallet)
                 else:
                     view = self.view.get_search_error(command="search_coin", settings=settings)
                 self.mongo.update_context(user_id, "search_coin")
@@ -102,8 +112,11 @@ class Controller:
                 symbol = command[1]
                 coin = self.mongo.get_db_coin(symbol)
                 self.mongo.remove_coin(user_id=user_id, coin=coin)
-                data = self.mongo.get_wallet(user_id)
-                view = self.view.get_wallet(data=data, settings=settings)
+
+                data = self.mongo.get_coin(symbol, settings)
+                view = self.view.get_coin(coin=data, settings=settings, in_wallet=True)
+                # data = self.mongo.get_wallet(user_id)
+                # view = self.view.get_wallet(data=data, settings=settings)
             elif "search" in command:
                 self.mongo.update_context(user_id, command)
                 view = self.view.get_search(settings)
@@ -112,7 +125,18 @@ class Controller:
                 coin_symbol = command[1]
                 from_view = command[2]
                 data = self.mongo.get_coin(coin_symbol, settings)
-                view = self.view.get_coin(from_view=from_view, coin=data, settings=settings)
+
+                wallet = self.mongo.get_wallet(user_id)
+
+                i = 0
+                in_wallet = False
+                while i < len(wallet) and in_wallet is False:
+                    if coin_symbol == wallet[i]['symbol']:
+                        in_wallet = True
+                    else:
+                        in_wallet = False
+                    i += 1
+                view = self.view.get_coin(from_view=from_view, coin=data, settings=settings, in_wallet=in_wallet)
         elif command == "top_10":
             data = self.mongo.get_top_10()
             view = self.view.get_top_10(command=command, data=data, settings=settings)
@@ -125,6 +149,13 @@ class Controller:
             view = self.view.get_languaje(settings)
         elif command == "currency":
             view = self.view.get_currency(settings)
+        elif 'to_wallet' in command:
+            symbol = command.split()[1]
+            coin = self.mongo.get_db_coin(symbol)
+            self.mongo.add_coin_to_user(user_id, coin)
+
+            data = self.mongo.get_coin(symbol, settings)
+            view = self.view.get_coin(coin=data, settings=settings, in_wallet=True)
         elif 'db' in command:
             attribute = command.split()[1]
             value = command.split()[2]

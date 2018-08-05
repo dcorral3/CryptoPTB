@@ -85,9 +85,7 @@ class Mongodb:
     def get_coin(self, symbol, settings):
         coin_obj = self.db.coins.find_one({'symbol': symbol})
         url, symbol = url_generator(coin=coin_obj)
-        print(str(url))
         req = requests.get(url)
-        print(str(req))
         data = req.json()["data"]
         if req.status_code == 200 and coin_obj:
             if settings['currency'] == 'EUR':
