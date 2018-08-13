@@ -2,10 +2,52 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
-class viewObject:
+class view_object:
     def __init__(self, text=None, keyboard=None):
         self.text = text
         self.keyboard = keyboard
+
+
+def get_text(view, settings):
+    if view == 'start':
+        if settings['language'] == 'ESP':
+            return 'Menú principal'
+        elif settings['language'] == 'ENG':
+            return '"Main Menu'
+    elif view == 'top_10':
+        if settings['language'] == 'ESP':
+            return 'Monedas en el Top 10:'
+        elif settings['language'] == 'ENG':
+            return 'Top 10 coins:'
+    elif view == 'search' or view == 'add_coin':
+        if settings['language'] == 'ESP':
+            return 'Enviamé el nombre corto de la moneda, por favor. (e.j: BTC)'
+        elif settings['language'] == 'ENG':
+            return 'Send me the coin short name, please. (e.j: BTC)'
+    elif view == 'search_error':
+        if settings['language'] == 'ESP':
+            return '⚠️ Oops! No he podido encontrar esa moneda.'
+        elif settings['language'] == 'ENG':
+            return '⚠️ Oops! I cant find this coin.'
+    elif view == 'settings':
+        if settings['language'] == 'ESP':
+            return 'Tu configuración actual es:\n\nIdioma: ' \
+                   + str(settings['language']) \
+                   + '\nMoneda: ' + str(settings['currency'])
+        elif settings['language'] == 'ENG':
+            return 'Your current settings:\n\nLanguage: ' \
+                   + str(settings['language']) \
+                   + '\nCurrency: ' + str(settings['currency'])
+    elif view == 'language':
+        if settings['language'] == 'ESP':
+            return 'Elige el idioma en el que quieres que te hable:'
+        elif settings['language'] == 'ENG':
+            return 'Choose the language in which you want me to speak to you:'
+    elif view == 'currency':
+        if settings['language'] == 'ESP':
+            return 'Elige la moneda en la que quieres que te envíe los valores:'
+        elif settings['language'] == 'ENG':
+            return 'Choose the currency in which you want the values ​​to be sent:'
 
 
 class View:
@@ -39,11 +81,10 @@ class View:
     def get_start(self, settings):
         if settings['language'] == 'ESP':
             keyb = InlineKeyboardMarkup(self.keyboard_esp)
-            text = "Menú principal"
         else:
             keyb = InlineKeyboardMarkup(self.keyboard)
-            text = "Main Menu"
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('start', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def get_wallet(self, command='wallet', data=None, settings=None):
         if len(data) > 3:
@@ -51,46 +92,44 @@ class View:
         else:
             keyb = self.keyboard_generator(columns=1, command=command, myList=data, settings=settings)
         text = "Wallet:"
-        return viewObject(text=text, keyboard=keyb)
+        return view_object(text=text, keyboard=keyb)
 
     def get_top_10(self, command='top_10', data=None, settings=None):
         if settings['language'] == 'ESP':
             keyb = self.keyboard_generator(columns=2, command=command, myList=data, settings=settings)
-            text = "Monedas en el Top 10:"
         else:
             keyb = self.keyboard_generator(columns=2, command=command, myList=data, settings=settings)
-            text = "Top 10 coins:"
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('top_10', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def get_search(self, settings):
         if settings['language'] == 'ESP':
-            text = 'Enviamé el nombre corto de la moneda, por favor. (e.j: BTC)'
             inline_key = [[InlineKeyboardButton(text='Cancelar', callback_data='cancel_search')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         else:
-            text = 'Send me the coin short name, please. (e.j: BTC)'
             inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('search', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def get_search_error(self, command=None, settings=None):
         if settings['language'] == 'ESP':
-            text = '⚠️ Oops! No he podido encontrar esa moneda.'
             inline_key = [[InlineKeyboardButton(text='Reintentar', callback_data=command)],
                           [InlineKeyboardButton(text='Cancelar', callback_data='cancel_search')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         else:
-            text = '⚠️ Oops! I cant find this coin.'
             inline_key = [[InlineKeyboardButton(text='Retry', callback_data=command)],
                           [InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('search_error', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def get_coin(self, from_view='wallet', coin=None, settings=None, in_wallet=None):
         inline_key = []
         if settings['language'] == 'ESP':
             inline_key.append(
-                [InlineKeyboardButton(text='Actualizar', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
+                [InlineKeyboardButton(text='Actualizar',
+                                      callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
 
             # añade opcion remover solo si estas en wallet
             # if from_view == "wallet":
@@ -178,67 +217,59 @@ class View:
                    + 'Last week: ' + str(last_week) + "%" + last_week_icon + '\n\n' \
                    + 'Last update: ' + coin['time']
 
-        return viewObject(text=text, keyboard=keyb)
+        return view_object(text=text, keyboard=keyb)
 
     def get_add_coin(self, settings):
         if settings['language'] == 'ESP':
-            text = 'Enviamé el nombre corto de la moneda, por favor. (e.j: BTC)'
             inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel wallet add_coin')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         else:
-            text = 'Send me the coin short name, please. (e.j: BTC)'
             inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel wallet add_coin')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('add_coin', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def get_settings(self, settings):
         if settings['language'] == 'ESP':
-            text = 'Tu configuración actual es:\n\nIdioma: ' \
-                   + str(settings['language']) \
-                   + '\nMoneda: ' + str(settings['currency'])
             inline_key = [[InlineKeyboardButton(text='Idioma', callback_data='language')],
                           [InlineKeyboardButton(text='Moneda', callback_data='currency')],
                           self.back_buttons_esp['start']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         else:
-            text = 'Your current settings:\n\nLanguage: ' \
-                   + str(settings['language']) \
-                   + '\nCurrency: ' + str(settings['currency'])
             inline_key = [[InlineKeyboardButton(text='Language', callback_data='language')],
                           [InlineKeyboardButton(text='Currency', callback_data='currency')],
                           self.back_buttons['start']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('settings', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def get_languaje(self, settings):
         if settings['language'] == 'ESP':
-            text = 'Elige el idioma en el que quieres que te hable:'
             inline_key = [[InlineKeyboardButton(text='🇬🇧 Inglés', callback_data='db language ENG'),
                            InlineKeyboardButton(text='🇪🇸 Español', callback_data='db language ESP')],
                           self.back_buttons_esp['settings']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         else:
-            text = 'Choose the language in which you want me to speak to you:'
             inline_key = [[InlineKeyboardButton(text='🇬🇧 English', callback_data='db language ENG'),
                            InlineKeyboardButton(text='🇪🇸 Spanish', callback_data='db language ESP')],
                           self.back_buttons['settings']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('language', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def get_currency(self, settings):
         if settings['language'] == 'ESP':
-            text = 'Elige la moneda en la que quieres que te envíe los valores:'
             inline_key = [[InlineKeyboardButton(text='USD', callback_data='db currency USD'),
                            InlineKeyboardButton(text='EUR', callback_data='db currency EUR')],
                           self.back_buttons_esp['settings']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         else:
-            text = 'Choose the currency in which you want the values ​​to be sent:'
             inline_key = [[InlineKeyboardButton(text='USD', callback_data='db currency USD'),
                            InlineKeyboardButton(text='EUR', callback_data='db currency EUR')],
                           self.back_buttons['settings']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        return viewObject(text=text, keyboard=keyb)
+        text = get_text('currency', settings)
+        return view_object(text=text, keyboard=keyb)
 
     def keyboard_generator(self, columns=1, command=None, myList=None, settings=None):
         inline_key = []
@@ -270,4 +301,4 @@ class View:
         return InlineKeyboardMarkup(inline_keyboard=inline_key)
 
     def get_help(self):
-        return viewObject(text="help!")
+        return view_object(text="help!")
