@@ -7,11 +7,11 @@ from pprint import pprint
 
 
 def clean_top_10_json(coins=None):
-    coinList = []
+    coin_list = []
     for coin in coins:
         my_dict = {'_id': coin['id'], 'name': coin['name'], 'symbol': coin['symbol']}
-        coinList.append(my_dict)
-    return coinList
+        coin_list.append(my_dict)
+    return coin_list
 
 
 def url_generator(coin=None):
@@ -140,3 +140,36 @@ class Mongodb:
         data = self.db.users.find({"_id": user_id}, {"_id": 0})
         data = data[0]["settings"]
         return data
+
+    def get_graph_data(self, graph_type, symbol, currency):
+        url = ""
+        if graph_type == 'hour':         # get last hour minut by minut
+            url = "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=59"
+        elif graph_type == '24h':       # get last 24h minut by minut
+            url = "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=1440"
+        elif graph_type == 'week':      # get last 7 days hour by hour
+            url = "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=168"
+        elif graph_type == 'month':     # get last month hour by hour
+            url = "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=720"
+
+        data = requests.get(url).json()['Data']
+        list_values = []
+        list_dates = []
+        max_value = min_value = max_date = min_date = None
+
+        for item in data:
+            list_values.append(item['close'])
+            if max_value is None or item['close'] > max_value:
+                max_value = item['close']
+            if min_value is None or item['close'] < min_value:
+                min_value = item['close']
+
+            list_dates.append(datetime.fromtimestamp(item['time']))
+            if max_date is None or item['time'] > max_date:
+                max_date = item['time']
+            if min_date is None or item['time'] < min_date:
+                min_date = item['time']
+
+        return list_values, list_dates, max_value, min_value, max_date, min_date
+
+

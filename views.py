@@ -2,7 +2,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
-class view_object:
+class ViewObject:
     def __init__(self, text=None, keyboard=None):
         self.text = text
         self.keyboard = keyboard
@@ -84,7 +84,7 @@ class View:
         else:
             keyb = InlineKeyboardMarkup(self.keyboard)
         text = get_text('start', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_wallet(self, command='wallet', data=None, settings=None):
         if len(data) > 3:
@@ -92,7 +92,7 @@ class View:
         else:
             keyb = self.keyboard_generator(columns=1, command=command, myList=data, settings=settings)
         text = "Wallet:"
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_top_10(self, command='top_10', data=None, settings=None):
         if settings['language'] == 'ESP':
@@ -100,7 +100,7 @@ class View:
         else:
             keyb = self.keyboard_generator(columns=2, command=command, myList=data, settings=settings)
         text = get_text('top_10', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_search(self, settings):
         if settings['language'] == 'ESP':
@@ -110,7 +110,7 @@ class View:
             inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = get_text('search', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_search_error(self, command=None, settings=None):
         if settings['language'] == 'ESP':
@@ -122,23 +122,32 @@ class View:
                           [InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = get_text('search_error', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_coin(self, from_view='wallet', coin=None, settings=None, in_wallet=None):
         inline_key = []
         if settings['language'] == 'ESP':
             inline_key.append(
-                [InlineKeyboardButton(text='Actualizar',
-                                      callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
+                [InlineKeyboardButton(text='📈 Última hora', callback_data='hour_graph ' + str(coin['symbol'])),
+                 InlineKeyboardButton(text='📈 Últimas 24h', callback_data='day_graph ' + str(coin['symbol']))]
+            )
+            inline_key.append(
+                [InlineKeyboardButton(text='📈 Última semana', callback_data='week_graph ' + str(coin['symbol'])),
+                 InlineKeyboardButton(text='📈 Último mes', callback_data='month_graph ' + str(coin['symbol']))]
+            )
 
             # añade opcion remover solo si estas en wallet
             # if from_view == "wallet":
             if in_wallet:
-                inline_key[0].append(
-                    InlineKeyboardButton(text="Eliminar de Wallet", callback_data="remove_coin " + str(coin['symbol'])))
+                inline_key.append(
+                    [InlineKeyboardButton(text="Eliminar de Wallet", callback_data="remove_coin " + str(coin['symbol']))])
             else:
-                inline_key[0].append(
-                    InlineKeyboardButton(text="Añadir a Wallet", callback_data="to_wallet " + str(coin['symbol'])))
+                inline_key.append(
+                    [InlineKeyboardButton(text="Añadir a Wallet", callback_data="to_wallet " + str(coin['symbol']))])
+
+            inline_key.append(
+                [InlineKeyboardButton(text='Actualizar',
+                                      callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
 
             inline_key.append(self.back_buttons_esp[from_view])
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
@@ -172,19 +181,22 @@ class View:
                    + 'Última actualización: ' + coin['time']
         else:
             inline_key.append(
-                [InlineKeyboardButton(text='Update', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
+                [InlineKeyboardButton(text='📈 Last hour', callback_data='hour_graph ' + str(coin['symbol'])),
+                 InlineKeyboardButton(text='📈 Last 24h', callback_data='day_graph ' + str(coin['symbol']))])
 
-            # añade opcion remover solo si estas en wallet
-            if from_view == "wallet":
-                inline_key[0].append(
-                    InlineKeyboardButton(text="Remove from Wallet", callback_data="remove_coin " + str(coin['symbol'])))
+            inline_key.append([
+                InlineKeyboardButton(text='📈 Last week', callback_data='week_graph ' + str(coin['symbol'])),
+                InlineKeyboardButton(text='📈 Last month', callback_data='month_graph ' + str(coin['symbol']))])
 
             if in_wallet:
-                inline_key[0].append(
-                    InlineKeyboardButton(text="Remove from Wallet", callback_data="remove_coin " + str(coin['symbol'])))
+                inline_key.append(
+                    [InlineKeyboardButton(text="Remove from Wallet", callback_data="remove_coin " + str(coin['symbol']))])
             else:
-                inline_key[0].append(
-                    InlineKeyboardButton(text="Add to Wallet", callback_data="to_wallet " + str(coin['symbol'])))
+                inline_key.append(
+                    [InlineKeyboardButton(text="Add to Wallet", callback_data="to_wallet " + str(coin['symbol']))])
+
+            inline_key.append(
+                [InlineKeyboardButton(text='Update', callback_data='coin ' + str(coin['symbol']) + ' ' + from_view)])
 
             inline_key.append(self.back_buttons[from_view])
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
@@ -217,7 +229,7 @@ class View:
                    + 'Last week: ' + str(last_week) + "%" + last_week_icon + '\n\n' \
                    + 'Last update: ' + coin['time']
 
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_add_coin(self, settings):
         if settings['language'] == 'ESP':
@@ -227,7 +239,7 @@ class View:
             inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel wallet add_coin')]]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = get_text('add_coin', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_settings(self, settings):
         if settings['language'] == 'ESP':
@@ -241,7 +253,7 @@ class View:
                           self.back_buttons['start']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = get_text('settings', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_languaje(self, settings):
         if settings['language'] == 'ESP':
@@ -255,7 +267,7 @@ class View:
                           self.back_buttons['settings']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = get_text('language', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
 
     def get_currency(self, settings):
         if settings['language'] == 'ESP':
@@ -269,7 +281,15 @@ class View:
                           self.back_buttons['settings']]
             keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
         text = get_text('currency', settings)
-        return view_object(text=text, keyboard=keyb)
+        return ViewObject(text=text, keyboard=keyb)
+
+    def get_hide_button(self, settings):
+        inline_key = []
+        if settings['language'] == 'ESP':
+            inline_key.append([InlineKeyboardButton(text='Ocultar', callback_data='hide')])
+        else:
+            inline_key.append([InlineKeyboardButton(text='Hide', callback_data='hide')])
+        return InlineKeyboardMarkup(inline_keyboard=inline_key)
 
     def keyboard_generator(self, columns=1, command=None, myList=None, settings=None):
         inline_key = []
@@ -301,4 +321,4 @@ class View:
         return InlineKeyboardMarkup(inline_keyboard=inline_key)
 
     def get_help(self):
-        return view_object(text="help!")
+        return ViewObject(text="help!")
