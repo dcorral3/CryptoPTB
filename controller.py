@@ -2,6 +2,7 @@
 from views import View
 from services import Mongodb
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator, HourLocator, MinuteLocator, DateFormatter, drange
 from numpy import arange
@@ -24,9 +25,10 @@ def clean_wallet(wallet):
 def silentremove(filename):
     try:
         os.remove(filename)
-    except OSError as e:  # this would be "except OSError, e:" before Python 2.6
-        if e.errno != errno.ENOENT:  # errno.ENOENT = no such file or directory
-            raise  # re-raise exception if a different error occurred
+    except OSError as e: 
+        print(e.message)
+        if e.errno != errno.ENOENT:
+            raise
 
 
 class Controller:
@@ -241,11 +243,9 @@ class Controller:
 
     def save_last_hour_graph_png(self, user_id, symbol, currency, text_title):
         list_values, list_dates, max_value, min_value, max_date, min_date = \
-            self.mongo.get_graph_data('hour', symbol, currency)
-
+        self.mongo.get_graph_data('hour', symbol, currency)
         fig, ax = plt.subplots()
         ax.plot(list_dates, list_values)
-
         plt.ylabel(currency)
 
         ax.xaxis.set_major_locator(MinuteLocator(interval=10))
@@ -257,12 +257,10 @@ class Controller:
         # beautify the x-labels
         plt.gcf().autofmt_xdate()
         plt.title(text_title + ' (' + symbol + ')')
-
         if not os.path.exists('graphs'):
             os.makedirs('graphs')
-
         fig.savefig('graphs/' + str(user_id) + '.png')
-
+    
     def save_last_24h_graph_png(self, user_id, symbol, currency, text_title):
         list_values, list_dates, max_value, min_value, max_date, min_date = \
             self.mongo.get_graph_data('24h', symbol, currency)
