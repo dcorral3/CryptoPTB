@@ -27,13 +27,14 @@ def silentremove(filename):
 class Controller:
 
     def __init__(self):
-        self.view = View()
         self.mongo = Mongodb()
+        self.view = View()
 
     # Commands
     def start(self, bot, update):
         user_id = update.message.chat_id
         user = self.mongo.get_user_id(user_id)
+        settings = None
 
         if not user:
             wallet = []
@@ -151,7 +152,7 @@ class Controller:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'ESP':
+            if settings['language'] == 'SPA':
                 text_title = "Última hora"
             else:
                 text_title = "Last hour"
@@ -165,7 +166,7 @@ class Controller:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'ESP':
+            if settings['language'] == 'SPA':
                 text_title = "Últimas 24h"
             else:
                 text_title = "Last 24h"
@@ -179,7 +180,7 @@ class Controller:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'ESP':
+            if settings['language'] == 'SPA':
                 text_title = "Última semana"
             else:
                 text_title = "Last week"
@@ -193,7 +194,7 @@ class Controller:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'ESP':
+            if settings['language'] == 'SPA':
                 text_title = "Último mes"
             else:
                 text_title = "Last month"

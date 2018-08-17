@@ -1,5 +1,8 @@
 # coding=utf-8
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from languages import LANG
+import view_utils as vu
+import keyboards
 
 
 class ViewObject:
@@ -7,126 +10,55 @@ class ViewObject:
         self.text = text
         self.keyboard = keyboard
 
-
-def get_text(view, settings):
-    if view == 'start':
-        if settings['language'] == 'ESP':
-            return 'Menú principal'
-        elif settings['language'] == 'ENG':
-            return '"Main Menu'
-    elif view == 'top_10':
-        if settings['language'] == 'ESP':
-            return 'Monedas en el Top 10:'
-        elif settings['language'] == 'ENG':
-            return 'Top 10 coins:'
-    elif view == 'search' or view == 'add_coin':
-        if settings['language'] == 'ESP':
-            return 'Enviamé el nombre corto de la moneda, por favor. (e.j: BTC)'
-        elif settings['language'] == 'ENG':
-            return 'Send me the coin short name, please. (e.j: BTC)'
-    elif view == 'search_error':
-        if settings['language'] == 'ESP':
-            return '⚠️ Oops! No he podido encontrar esa moneda.'
-        elif settings['language'] == 'ENG':
-            return '⚠️ Oops! I cant find this coin.'
-    elif view == 'settings':
-        if settings['language'] == 'ESP':
-            return 'Tu configuración actual es:\n\nIdioma: ' \
-                   + str(settings['language']) \
-                   + '\nMoneda: ' + str(settings['currency'])
-        elif settings['language'] == 'ENG':
-            return 'Your current settings:\n\nLanguage: ' \
-                   + str(settings['language']) \
-                   + '\nCurrency: ' + str(settings['currency'])
-    elif view == 'language':
-        if settings['language'] == 'ESP':
-            return 'Elige el idioma en el que quieres que te hable:'
-        elif settings['language'] == 'ENG':
-            return 'Choose the language in which you want me to speak to you:'
-    elif view == 'currency':
-        if settings['language'] == 'ESP':
-            return 'Elige la moneda en la que quieres que te envíe los valores:'
-        elif settings['language'] == 'ENG':
-            return 'Choose the currency in which you want the values ​​to be sent:'
-
-
 class View:
-    back_buttons = {
-        "start": [InlineKeyboardButton(text="<< Back to Main menu", callback_data='start')],
-        "top_10": [InlineKeyboardButton(text='<< Back to Top 10', callback_data='top_10')],
-        "wallet": [InlineKeyboardButton(text='<< Back to Wallet', callback_data='wallet')],
-        "settings": [InlineKeyboardButton(text='<< Back to Settings', callback_data='settings')]
-    }
-    back_buttons_esp = {
-        "start": [InlineKeyboardButton(text="<< Volver al Menú principal", callback_data='start')],
-        "top_10": [InlineKeyboardButton(text='<< Volver al Top 10', callback_data='top_10')],
-        "wallet": [InlineKeyboardButton(text='<< Volver a Wallet', callback_data='wallet')],
-        "settings": [InlineKeyboardButton(text='<< Volver a Configuración', callback_data='settings')]
-    }
-
-    add_coin_button = [InlineKeyboardButton(text="Add coin", callback_data='add_coin')]
-    add_coin_button_esp = [InlineKeyboardButton(text="Añadir moneda", callback_data='add_coin')]
-
-    def __init__(self):
-        self.keyboard = [[InlineKeyboardButton("💰 Wallet", callback_data='wallet'),
-                          InlineKeyboardButton("🔝 Top 10", callback_data='top_10')],
-                         [InlineKeyboardButton("🔍 Search coin", callback_data='search_coin'),
-                          InlineKeyboardButton("⚙️ Settings", callback_data='settings')]]
-
-        self.keyboard_esp = [[InlineKeyboardButton("💰 Wallet", callback_data='wallet'),
-                              InlineKeyboardButton("🔝 Top 10", callback_data='top_10')],
-                             [InlineKeyboardButton("🔍 Buscar moneda", callback_data='search_coin'),
-                              InlineKeyboardButton("⚙️ Configuración", callback_data='settings')]]
-
     def get_start(self, settings):
-        if settings['language'] == 'ESP':
-            keyb = InlineKeyboardMarkup(self.keyboard_esp)
-        else:
-            keyb = InlineKeyboardMarkup(self.keyboard)
-        text = get_text('start', settings)
+        keyb = keyboards.get_main_menu(settings)
+        text = vu.get_text('start', settings)
         return ViewObject(text=text, keyboard=keyb)
 
     def get_wallet(self, command='wallet', data=None, settings=None):
-        if len(data) > 3:
-            keyb = self.keyboard_generator(columns=2, command=command, myList=data, settings=settings)
-        else:
-            keyb = self.keyboard_generator(columns=1, command=command, myList=data, settings=settings)
-        text = "Wallet:"
+        keyb = keyboards.get_wallet(command=command, data=data, settings=settings)
+        text = vu.get_text(command, settings)
         return ViewObject(text=text, keyboard=keyb)
 
     def get_top_10(self, command='top_10', data=None, settings=None):
-        if settings['language'] == 'ESP':
-            keyb = self.keyboard_generator(columns=2, command=command, myList=data, settings=settings)
-        else:
-            keyb = self.keyboard_generator(columns=2, command=command, myList=data, settings=settings)
-        text = get_text('top_10', settings)
+        keyb = keyboards.get_top_10(command=command, data=data, settings=settings)
+        text = vu.get_text(command, settings)
         return ViewObject(text=text, keyboard=keyb)
 
     def get_search(self, settings):
-        if settings['language'] == 'ESP':
-            inline_key = [[InlineKeyboardButton(text='Cancelar', callback_data='cancel_search')]]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        else:
-            inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        text = get_text('search', settings)
+        keyb = keyboards.get_search(settings=settings)
+        text = vu.get_text('search', settings)
         return ViewObject(text=text, keyboard=keyb)
 
     def get_search_error(self, command=None, settings=None):
-        if settings['language'] == 'ESP':
-            inline_key = [[InlineKeyboardButton(text='Reintentar', callback_data=command)],
-                          [InlineKeyboardButton(text='Cancelar', callback_data='cancel_search')]]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        else:
-            inline_key = [[InlineKeyboardButton(text='Retry', callback_data=command)],
-                          [InlineKeyboardButton(text='Cancel', callback_data='cancel_search')]]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        text = get_text('search_error', settings)
+        keyb = keyboards.get_search_error(command=command, settings=settings)
+        text = vu.get_text('search_error', settings)
+        return ViewObject(text=text, keyboard=keyb)
+
+    def get_settings(self, settings):
+        keyb = keyboards.get_settings(settings)
+        text = vu.get_text('settings', settings)
+        return ViewObject(text=text, keyboard=keyb)
+
+    def get_add_coin(self, settings):
+        keyb = keyboards.get_add_coin(settings)
+        text = vu.get_text('search', settings)
+        return ViewObject(text=text, keyboard=keyb)
+
+    def get_currency(self, settings):
+        keyb = keyboards.get_currency(settings)
+        text = vu.get_text('currency', settings)
+        return ViewObject(text=text, keyboard=keyb)
+
+    def get_languaje(self, settings):
+        keyb = keyboards.get_language(settings)
+        text = vu.get_text('language', settings)
         return ViewObject(text=text, keyboard=keyb)
 
     def get_coin(self, from_view='wallet', coin=None, settings=None, in_wallet=None):
         inline_key = []
-        if settings['language'] == 'ESP':
+        if settings['language'] == 'SPA':
             inline_key.append(
                 [InlineKeyboardButton(text='📈 Última hora', callback_data='hour_graph ' + str(coin['symbol'])),
                  InlineKeyboardButton(text='📈 Últimas 24h', callback_data='day_graph ' + str(coin['symbol']))]
@@ -231,93 +163,12 @@ class View:
 
         return ViewObject(text=text, keyboard=keyb)
 
-    def get_add_coin(self, settings):
-        if settings['language'] == 'ESP':
-            inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel wallet add_coin')]]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        else:
-            inline_key = [[InlineKeyboardButton(text='Cancel', callback_data='cancel wallet add_coin')]]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        text = get_text('add_coin', settings)
-        return ViewObject(text=text, keyboard=keyb)
-
-    def get_settings(self, settings):
-        if settings['language'] == 'ESP':
-            inline_key = [[InlineKeyboardButton(text='Idioma', callback_data='language')],
-                          [InlineKeyboardButton(text='Moneda', callback_data='currency')],
-                          self.back_buttons_esp['start']]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        else:
-            inline_key = [[InlineKeyboardButton(text='Language', callback_data='language')],
-                          [InlineKeyboardButton(text='Currency', callback_data='currency')],
-                          self.back_buttons['start']]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        text = get_text('settings', settings)
-        return ViewObject(text=text, keyboard=keyb)
-
-    def get_languaje(self, settings):
-        if settings['language'] == 'ESP':
-            inline_key = [[InlineKeyboardButton(text='🇬🇧 Inglés', callback_data='db language ENG'),
-                           InlineKeyboardButton(text='🇪🇸 Español', callback_data='db language ESP')],
-                          self.back_buttons_esp['settings']]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        else:
-            inline_key = [[InlineKeyboardButton(text='🇬🇧 English', callback_data='db language ENG'),
-                           InlineKeyboardButton(text='🇪🇸 Spanish', callback_data='db language ESP')],
-                          self.back_buttons['settings']]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        text = get_text('language', settings)
-        return ViewObject(text=text, keyboard=keyb)
-
-    def get_currency(self, settings):
-        if settings['language'] == 'ESP':
-            inline_key = [[InlineKeyboardButton(text='USD', callback_data='db currency USD'),
-                           InlineKeyboardButton(text='EUR', callback_data='db currency EUR')],
-                          self.back_buttons_esp['settings']]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        else:
-            inline_key = [[InlineKeyboardButton(text='USD', callback_data='db currency USD'),
-                           InlineKeyboardButton(text='EUR', callback_data='db currency EUR')],
-                          self.back_buttons['settings']]
-            keyb = InlineKeyboardMarkup(inline_keyboard=inline_key)
-        text = get_text('currency', settings)
-        return ViewObject(text=text, keyboard=keyb)
-
     def get_hide_button(self, settings):
         inline_key = []
-        if settings['language'] == 'ESP':
+        if settings['language'] == 'SPA':
             inline_key.append([InlineKeyboardButton(text='Ocultar', callback_data='hide')])
         else:
             inline_key.append([InlineKeyboardButton(text='Hide', callback_data='hide')])
-        return InlineKeyboardMarkup(inline_keyboard=inline_key)
-
-    def keyboard_generator(self, columns=1, command=None, myList=None, settings=None):
-        inline_key = []
-        for i in range(0, len(myList), columns):
-            raw_buttons = []
-            if (len(myList) - i) < columns:
-                columns = len(myList) - i
-            for c in range(0, columns, 1):
-                raw_buttons.append(InlineKeyboardButton(text=myList[i + c]['name'],
-                                                        callback_data='coin '
-                                                                      + myList[i + c]['symbol'] + ' '
-                                                                      + command))
-            inline_key.append(raw_buttons)
-
-        if command == 'top_10':
-            if settings['language'] == 'ENG':
-                inline_key.append(self.back_buttons["start"])
-            else:
-                inline_key.append(self.back_buttons_esp["start"])
-
-        elif command == 'wallet':
-            if settings['language'] == 'ENG':
-                inline_key.append(self.add_coin_button)
-                inline_key.append(self.back_buttons["start"])
-            else:
-                inline_key.append(self.add_coin_button_esp)
-                inline_key.append(self.back_buttons_esp["start"])
-
         return InlineKeyboardMarkup(inline_keyboard=inline_key)
 
     def get_help(self):
