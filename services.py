@@ -4,6 +4,7 @@ from pymongo import MongoClient
 import config as conf
 from datetime import datetime
 from pprint import pprint
+from graph import Graph
 
 
 def clean_top_10_json(coins=None):
@@ -141,15 +142,15 @@ class Mongodb:
         data = data[0]["settings"]
         return data
 
-    def get_graph_data(self, graph_type, symbol, currency):
+    def get_graph(self, graph_type, symbol, currency):
         url = ""
-        if graph_type == 'hour':         # get last hour minut by minut
+        if graph_type == 'hour_graph':         # get last hour minut by minut
             url = "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=59"
-        elif graph_type == '24h':       # get last 24h minut by minut
+        elif graph_type == 'day_graph':       # get last 24h minut by minut
             url = "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=1440"
-        elif graph_type == 'week':      # get last 7 days hour by hour
+        elif graph_type == 'week_graph':      # get last 7 days hour by hour
             url = "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=168"
-        elif graph_type == 'month':     # get last month hour by hour
+        elif graph_type == 'month_graph':     # get last month hour by hour
             url = "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=720"
 
         data = requests.get(url).json()['Data']
@@ -170,6 +171,8 @@ class Mongodb:
             if min_date is None or item['time'] < min_date:
                 min_date = item['time']
 
-        return list_values, list_dates, max_value, min_value, max_date, min_date
+        return Graph(graph_type=graph_type, symbol=symbol, currency=currency,
+                        list_values=list_values, list_dates=list_dates, max_value=max_value,
+                        min_value=min_value, max_date=max_date, min_date=min_date)
 
 

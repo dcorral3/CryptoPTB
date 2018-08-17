@@ -1,12 +1,6 @@
 # coding=utf-8
 from views import View
 from services import Mongodb
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.dates import DayLocator, HourLocator, MinuteLocator, DateFormatter, drange
-from numpy import arange
-import numpy as np
 import os
 import errno
 
@@ -25,8 +19,7 @@ def clean_wallet(wallet):
 def silentremove(filename):
     try:
         os.remove(filename)
-    except OSError as e: 
-        print(e.message)
+    except OSError as e:
         if e.errno != errno.ENOENT:
             raise
 
@@ -155,48 +148,56 @@ class Controller:
                     i += 1
                 view = self.view.get_coin(from_view=from_view, coin=data, settings=settings, in_wallet=in_wallet)
         elif "hour_graph" in command:
+            graph_type = command.split()[0]
             symbol = command.split()[1]
+            currency = settings['currency']
             if settings['language'] == 'ESP':
                 text_title = "Última hora"
             else:
                 text_title = "Last hour"
-            self.save_last_hour_graph_png(user_id, symbol, settings['currency'], text_title)
+            self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
         elif "day_graph" in command:
+            graph_type = command.split()[0]
             symbol = command.split()[1]
+            currency = settings['currency']
             if settings['language'] == 'ESP':
                 text_title = "Últimas 24h"
             else:
                 text_title = "Last 24h"
-            self.save_last_24h_graph_png(user_id, symbol, settings['currency'], text_title)
+            self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
         elif "week_graph" in command:
+            graph_type = command.split()[0]
             symbol = command.split()[1]
+            currency = settings['currency']
             if settings['language'] == 'ESP':
                 text_title = "Última semana"
             else:
                 text_title = "Last week"
-            self.save_last_week_graph_png(user_id, symbol, settings['currency'], text_title)
+            self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
         elif "month_graph" in command:
+            graph_type = command.split()[0]
             symbol = command.split()[1]
+            currency = settings['currency']
             if settings['language'] == 'ESP':
                 text_title = "Último mes"
             else:
                 text_title = "Last month"
-            self.save_last_month_graph_png(user_id, symbol, settings['currency'], text_title)
+            self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
@@ -236,99 +237,12 @@ class Controller:
         else:
             data = ""
 
-        if view is not None and old_text != view.text:
+        if view != None and old_text != view.text:
             bot.edit_message_text(text=view.text, chat_id=user_id,
                                   message_id=query.message.message_id, reply_markup=view.keyboard)
         bot.answer_callback_query(query.id)
 
-    def save_last_hour_graph_png(self, user_id, symbol, currency, text_title):
-        list_values, list_dates, max_value, min_value, max_date, min_date = \
-        self.mongo.get_graph_data('hour', symbol, currency)
-        fig, ax = plt.subplots()
-        ax.plot(list_dates, list_values)
-        plt.ylabel(currency)
-
-        ax.xaxis.set_major_locator(MinuteLocator(interval=10))
-        # range -> (0 -24) hours 6 by 6
-        ax.xaxis.set_minor_locator(MinuteLocator())
-        # date format in graph
-        ax.xaxis.set_major_formatter(DateFormatter('%H:%M'))
-
-        # beautify the x-labels
-        plt.gcf().autofmt_xdate()
-        plt.title(text_title + ' (' + symbol + ')')
-        if not os.path.exists('graphs'):
-            os.makedirs('graphs')
-        fig.savefig('graphs/' + str(user_id) + '.png')
-    
-    def save_last_24h_graph_png(self, user_id, symbol, currency, text_title):
-        list_values, list_dates, max_value, min_value, max_date, min_date = \
-            self.mongo.get_graph_data('24h', symbol, currency)
-
-        fig, ax = plt.subplots()
-        ax.plot(list_dates, list_values)
-
-        plt.ylabel(currency)
-
-        ax.xaxis.set_major_locator(HourLocator(interval=2))
-        # range -> (0 -24) hours 6 by 6
-        ax.xaxis.set_minor_locator(HourLocator())
-        # date format in graph
-        ax.xaxis.set_major_formatter(DateFormatter('%H:%M'))
-
-        # beautify the x-labels
-        plt.gcf().autofmt_xdate()
-        plt.title(text_title + ' (' + symbol + ')')
-
-        if not os.path.exists('graphs'):
-            os.makedirs('graphs')
-
-        fig.savefig('graphs/' + str(user_id) + '.png')
-
-    def save_last_week_graph_png(self, user_id, symbol, currency, text_title):
-        list_values, list_dates, max_value, min_value, max_date, min_date = \
-            self.mongo.get_graph_data('week', symbol, currency)
-
-        fig, ax = plt.subplots()
-        ax.plot(list_dates, list_values)
-
-        plt.ylabel(currency)
-
-        ax.xaxis.set_major_locator(DayLocator())
-        # range -> (0h -> 24h) hours 6 by 6
-        ax.xaxis.set_minor_locator(HourLocator(arange(0, 25, 6)))
-        # date format in graph
-        ax.xaxis.set_major_formatter(DateFormatter('%d %b'))
-
-        # beautify the x-labels
-        plt.gcf().autofmt_xdate()
-        plt.title(text_title + ' (' + symbol + ')')
-
-        if not os.path.exists('graphs'):
-            os.makedirs('graphs')
-
-        fig.savefig('graphs/' + str(user_id) + '.png')
-
-    def save_last_month_graph_png(self, user_id, symbol, currency, text_title):
-        list_values, list_dates, max_value, min_value, max_date, min_date = \
-            self.mongo.get_graph_data('month', symbol, currency)
-
-        fig, ax = plt.subplots()
-        ax.plot(list_dates, list_values)
-
-        plt.ylabel(currency)
-
-        ax.xaxis.set_major_locator(DayLocator(arange(0, 32, 3)))
-        # range -> (0 -24) hours 6 by 6
-        ax.xaxis.set_minor_locator(DayLocator())
-        # date format in graph
-        ax.xaxis.set_major_formatter(DateFormatter('%d %b'))
-
-        # beautify the x-labels
-        plt.gcf().autofmt_xdate()
-        plt.title(text_title + ' (' + symbol + ')')
-
-        if not os.path.exists('graphs'):
-            os.makedirs('graphs')
-
-        fig.savefig('graphs/' + str(user_id) + '.png')
+    def save_graph(self, graph_type, symbol, currency, text_title, user_id):
+        graph = self.mongo.get_graph(graph_type, symbol, currency)
+        graph.title = text_title
+        graph.save_graph_png(user_id)
