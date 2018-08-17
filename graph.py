@@ -2,7 +2,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator, HourLocator, MinuteLocator, DateFormatter
-from numpy import arange
 import os
 
 class Graph:
@@ -44,7 +43,7 @@ class Graph:
         elif self.type == 'hour_graph':
             return MinuteLocator(interval=10), MinuteLocator(), '%H:%M'
         elif self.type == 'week_graph':
-            return DayLocator(), HourLocator(arange(0, 25, 6)), '%d %b'
+            return DayLocator(), HourLocator(range(0, 25, 6)), '%d %b'
         elif self.type == 'day_graph':
             return HourLocator(interval=2), HourLocator(), '%H:%M'
         else:
