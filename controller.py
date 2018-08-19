@@ -142,6 +142,7 @@ class Controller:
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
+            bot.answer_callback_query(query.id)
         elif "day_graph" in command:
             graph_type = command.split()[0]
             symbol = command.split()[1]
@@ -153,6 +154,7 @@ class Controller:
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
+            bot.answer_callback_query(query.id)
         elif "week_graph" in command:
             graph_type = command.split()[0]
             symbol = command.split()[1]
@@ -164,6 +166,7 @@ class Controller:
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
+            bot.answer_callback_query(query.id)
         elif "month_graph" in command:
             graph_type = command.split()[0]
             symbol = command.split()[1]
@@ -175,6 +178,7 @@ class Controller:
                            photo=open('graphs/' + str(user_id) + '.png', 'rb'),
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
+            bot.answer_callback_query(query.id)
         elif command == 'hide':
             bot.delete_message(chat_id=user_id,message_id=query.message.message_id)
         elif command == "top_10":
@@ -208,7 +212,7 @@ class Controller:
             view = self.view.get_start(settings)
         else:
             data = ""
-        if old_text != view.text:
+        if view and old_text != view.text:
             bot.edit_message_text(text=view.text, chat_id=user_id,
                                   message_id=query.message.message_id,
                                   reply_markup=view.keyboard)
