@@ -3,11 +3,10 @@ import json
 from pymongo import MongoClient
 import config as conf
 from datetime import datetime
-from pprint import pprint
 from graph import Graph
 
 
-def clean_top_10_json(coins=None):
+def clear_coin_list(coins=None):
     coin_list = []
     for coin in coins:
         my_dict = {'_id': coin['id'], 'name': coin['name'], 'symbol': coin['symbol']}
@@ -26,8 +25,8 @@ class Mongodb:
     def __init__(self):
         self.coinsTop10 = requests.get("https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10").json()["data"]
         self.coins = requests.get("https://api.coinmarketcap.com/v2/listings/").json()["data"]
-        self.coinsTop10 = clean_top_10_json(self.coinsTop10)
-        self.coins = clean_top_10_json(self.coins)
+        self.coinsTop10 = clear_coin_list(self.coinsTop10)
+        self.coins = clear_coin_list(self.coins)
         self.db = MongoClient(
             host=conf.host,
             username=conf.username,
@@ -38,18 +37,14 @@ class Mongodb:
         try:
             self.db.coinsTop10.drop()
             self.db.coinsTop10.insert(self.coinsTop10)
-        except Exception as e:
-            print("DB Error: ", str(e))
-        finally:
-            self.top10coins = list(self.db.coinsTop10.find())
-
-        try:
             self.db.coins.drop()
             self.db.coins.insert(self.coins)
         except Exception as e:
             print("DB Error: ", str(e))
         finally:
+            self.top10coins = list(self.db.coinsTop10.find())
             self.coinList = list(self.db.coins.find())
+
 
     def get_user_id(self, user_id):
         return self.db.users.find_one({"_id": user_id})
@@ -57,17 +52,13 @@ class Mongodb:
     def insert_or_update_user(self, user_id, wallet, settings):
         context = {"add_coin": False, "search_coin": False}
         user = {"_id": user_id, 'wallet': wallet, "context": context, 'settings': settings}
-        #self.db.users.insert(user)
         self.db.users.update({'_id': user_id}, user, upsert=True)
-        print("user inserted in DB")
 
     def coin_exist(self, symbol=None):
         return self.db.coins.find_one({"symbol": symbol})
 
     def add_coin_to_user(self, user_id=None, coin=None):
-        #coin = self.db.coins.find_one({"symbol": symbol})
         self.db.users.update_one({'_id': user_id}, {'$addToSet': {'wallet': coin}}, upsert=True)
-        print("user updated in DB")
 
     def get_top_10(self):
         return self.top10coins
@@ -143,17 +134,14 @@ class Mongodb:
         return data
 
     def get_graph(self, graph_type, symbol, currency):
-        url = ""
-        if graph_type == 'hour_graph':         # get last hour minut by minut
-            url = "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=59"
-        elif graph_type == 'day_graph':       # get last 24h minut by minut
-            url = "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=1440"
-        elif graph_type == 'week_graph':      # get last 7 days hour by hour
-            url = "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=168"
-        elif graph_type == 'month_graph':     # get last month hour by hour
-            url = "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=720"
+        url = {
+            'hour_graph'  : "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=59",
+            'day_graph'   : "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=1440",
+            'week_graph'  : "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=168",
+            'month_graph' : "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=720"
+        }
 
-        data = requests.get(url).json()['Data']
+        data = requests.get(url[graph_type]).json()['Data']
         list_values = []
         list_dates = []
         max_value = min_value = max_date = min_date = None
@@ -172,7 +160,9 @@ class Mongodb:
                 min_date = item['time']
 
         return Graph(graph_type=graph_type, symbol=symbol, currency=currency,
-                        list_values=list_values, list_dates=list_dates, max_value=max_value,
-                        min_value=min_value, max_date=max_date, min_date=min_date)
+                     list_values=list_values, list_dates=list_dates, max_value=max_value,
+                     min_value=min_value, max_date=max_date, min_date=min_date)
 
-
+    def in_wallet(self, user_id, coin):
+        wallet=self.db.users.find_one({'_id': user_id}, {'_id': 0, 'wallet': {'$elemMatch': {'symbol': coin['symbol']}}})
+        return wallet != {}

@@ -1,20 +1,23 @@
 # coding=utf-8
 from views import View
 from services import Mongodb
+import view_utils as vu
 import os
 import errno
-
 
 def clean_wallet(wallet):
     new_wallet = []
     for coin in wallet:
         if 'id' in coin:
-            my_dict = {'id': coin['id'], 'name': coin['name'], 'symbol': coin['symbol']}
+            my_dict = {
+                'id': coin['id'],
+                'name': coin['name'],
+                'symbol': coin['symbol']
+            }
             new_wallet.append(my_dict)
         else:
             new_wallet.append(coin)
     return new_wallet
-
 
 def silentremove(filename):
     try:
@@ -23,17 +26,16 @@ def silentremove(filename):
         if e.errno != errno.ENOENT:
             raise
 
-
 class Controller:
 
     def __init__(self):
         self.mongo = Mongodb()
-        self.view = View()
+        self.view  = View()
 
     # Commands
     def start(self, bot, update):
-        user_id = update.message.chat_id
-        user = self.mongo.get_user_id(user_id)
+        user_id  = update.message.chat_id
+        user     = self.mongo.get_user_id(user_id)
         settings = None
 
         if not user:
@@ -75,17 +77,8 @@ class Controller:
             symbol = update.message.text.upper()
             try:
                 if self.mongo.coin_exist(symbol):
-                    wallet = self.mongo.get_wallet(user_id)
-                    i = 0
-                    in_wallet = False
-                    while i < len(wallet) and in_wallet is False:
-                        if symbol == wallet[i]['symbol']:
-                            in_wallet = True
-                        else:
-                            in_wallet = False
-                        i += 1
-
                     data = self.mongo.get_coin(symbol, settings)
+                    in_wallet = self.mongo.in_wallet(user_id, data)
                     view = self.view.get_coin("start", data, settings, in_wallet)
                 else:
                     view = self.view.get_search_error(command="search_coin", settings=settings)
@@ -123,11 +116,11 @@ class Controller:
             elif "remove" in command:
                 command = command.split()
                 symbol = command[1]
+                from_view = command[2]
                 coin = self.mongo.get_db_coin(symbol)
                 self.mongo.remove_coin(user_id=user_id, coin=coin)
-
                 data = self.mongo.get_coin(symbol, settings)
-                view = self.view.get_coin(coin=data, settings=settings, in_wallet=True)
+                view = self.view.get_coin(from_view=from_view, coin=data, settings=settings, in_wallet=False, feedback='feed_coin_removed')
             elif "search" in command:
                 self.mongo.update_context(user_id, command)
                 view = self.view.get_search(settings)
@@ -136,26 +129,13 @@ class Controller:
                 coin_symbol = command[1]
                 from_view = command[2]
                 data = self.mongo.get_coin(coin_symbol, settings)
-
-                wallet = self.mongo.get_wallet(user_id)
-
-                i = 0
-                in_wallet = False
-                while i < len(wallet) and in_wallet is False:
-                    if coin_symbol == wallet[i]['symbol']:
-                        in_wallet = True
-                    else:
-                        in_wallet = False
-                    i += 1
+                in_wallet=self.mongo.in_wallet(user_id, data)
                 view = self.view.get_coin(from_view=from_view, coin=data, settings=settings, in_wallet=in_wallet)
         elif "hour_graph" in command:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'SPA':
-                text_title = "Última hora"
-            else:
-                text_title = "Last hour"
+            text_title = vu.get_text('hour_graph_title', settings)
             self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
@@ -166,10 +146,7 @@ class Controller:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'SPA':
-                text_title = "Últimas 24h"
-            else:
-                text_title = "Last 24h"
+            text_title = vu.get_text('day_graph_title', settings)
             self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
@@ -180,10 +157,7 @@ class Controller:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'SPA':
-                text_title = "Última semana"
-            else:
-                text_title = "Last week"
+            text_title = vu.get_text('week_graph_title', settings)
             self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
@@ -194,10 +168,7 @@ class Controller:
             graph_type = command.split()[0]
             symbol = command.split()[1]
             currency = settings['currency']
-            if settings['language'] == 'SPA':
-                text_title = "Último mes"
-            else:
-                text_title = "Last month"
+            text_title = vu.get_text('month_graph_title', settings)
             self.save_graph(graph_type, symbol, currency, text_title, user_id)
             keyb = self.view.get_hide_button(settings)
             bot.send_photo(chat_id=user_id,
@@ -205,8 +176,7 @@ class Controller:
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
         elif command == 'hide':
-            bot.delete_message(chat_id=user_id,
-                               message_id=query.message.message_id)
+            bot.delete_message(chat_id=user_id,message_id=query.message.message_id)
         elif command == "top_10":
             data = self.mongo.get_top_10()
             view = self.view.get_top_10(command=command, data=data, settings=settings)
@@ -219,13 +189,14 @@ class Controller:
             view = self.view.get_languaje(settings)
         elif command == "currency":
             view = self.view.get_currency(settings)
-        elif 'to_wallet' in command:
-            symbol = command.split()[1]
+        elif 'add_to_wallet' in command:
+            command = command.split()
+            symbol = command[1]
+            from_view = command[2]
             coin = self.mongo.get_db_coin(symbol)
             self.mongo.add_coin_to_user(user_id, coin)
-
             data = self.mongo.get_coin(symbol, settings)
-            view = self.view.get_coin(coin=data, settings=settings, in_wallet=True)
+            view = self.view.get_coin(from_view=from_view, coin=data, settings=settings, in_wallet=True, feedback='feed_coin_added')
         elif 'db' in command:
             attribute = command.split()[1]
             value = command.split()[2]
@@ -237,11 +208,11 @@ class Controller:
             view = self.view.get_start(settings)
         else:
             data = ""
-
-        if view != None and old_text != view.text:
+        if old_text != view.text:
             bot.edit_message_text(text=view.text, chat_id=user_id,
-                                  message_id=query.message.message_id, reply_markup=view.keyboard)
-        bot.answer_callback_query(query.id)
+                                  message_id=query.message.message_id,
+                                  reply_markup=view.keyboard)
+        bot.answer_callback_query(query.id, text=view.feedback)
 
     def save_graph(self, graph_type, symbol, currency, text_title, user_id):
         graph = self.mongo.get_graph(graph_type, symbol, currency)

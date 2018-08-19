@@ -5,9 +5,11 @@ import keyboards
 
 
 class ViewObject:
-    def __init__(self, text=None, keyboard=None):
+    def __init__(self, text=None, keyboard=None, feedback=None):
         self.text = text
         self.keyboard = keyboard
+        self.feedback = feedback
+
 
 class View:
     def get_start(self, settings):
@@ -55,7 +57,7 @@ class View:
         text = vu.get_text('language', settings)
         return ViewObject(text=text, keyboard=keyb)
 
-    def get_coin(self, from_view='wallet', coin=None, settings=None, in_wallet=None):
+    def get_coin(self, from_view=None, coin=None, settings=None, in_wallet=None, feedback=None):
         keyb        = keyboards.get_coin(from_view, coin, settings, in_wallet)
         up_icon     = '🔺'
         down_icon   = '🔻'
@@ -66,7 +68,9 @@ class View:
         last_24h_i  = down_icon if last_24h < 0 else up_icon
         last_week_i = down_icon if last_week < 0 else up_icon
         text = vu.get_text('coin', settings, coin, last_1h_i, last_24h_i, last_week_i)
-        return ViewObject(text=text, keyboard=keyb)
+        if feedback:
+            feedback = vu.get_text(feedback, settings)
+        return ViewObject(text=text, keyboard=keyb, feedback=feedback)
 
     def get_hide_button(self, settings):
         return keyboards.get_hide_button(settings)

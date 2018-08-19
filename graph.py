@@ -3,6 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator, HourLocator, MinuteLocator, DateFormatter
 import os
+import view_utils as vu
 
 class Graph:
 
@@ -19,6 +20,7 @@ class Graph:
         self.min_date    = min_date
 
     def save_graph_png(self, user_id):
+
         fig, ax = plt.subplots()
         ax.plot(self.list_dates, self.list_values)
         plt.ylabel(self.currency)

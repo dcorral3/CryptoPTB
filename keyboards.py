@@ -101,13 +101,13 @@ def get_language(settings):
 
 def get_coin(from_view=None, coin=None, settings=None, in_wallet=None):
     button={
-        'hour'    : InlineKeyboardButton(text=vu.get_text('b_hour_graph', settings), callback_data='hour_graph ' + str(coin['symbol'])),
-        'day'     : InlineKeyboardButton(text=vu.get_text('b_day_graph', settings), callback_data='day_graph ' + str(coin['symbol'])),
-        'week'    : InlineKeyboardButton(text=vu.get_text('b_week_graph', settings), callback_data='week_graph ' + str(coin['symbol'])),
-        'month'   : InlineKeyboardButton(text=vu.get_text('b_month_graph', settings), callback_data='month_graph ' + str(coin['symbol'])),
-        'del_coin': InlineKeyboardButton(text=vu.get_text('b_del_coin', settings), callback_data="remove_coin " + str(coin['symbol'])),
-        'add_coin': InlineKeyboardButton(text=vu.get_text('b_add_coin', settings), callback_data="to_wallet " + str(coin['symbol'])),
-        'update'  : InlineKeyboardButton(text=vu.get_text('b_update', settings), callback_data='coin ' + str(coin['symbol']) + ' ' + from_view),
+        'hour'    : InlineKeyboardButton(text=vu.get_text('b_hour_graph', settings), callback_data='hour_graph {}'.format(str(coin['symbol']))),
+        'day'     : InlineKeyboardButton(text=vu.get_text('b_day_graph', settings), callback_data='day_graph {}'.format(str(coin['symbol']))),
+        'week'    : InlineKeyboardButton(text=vu.get_text('b_week_graph', settings), callback_data='week_graph {}'.format(str(coin['symbol']))),
+        'month'   : InlineKeyboardButton(text=vu.get_text('b_month_graph', settings), callback_data='month_graph {}'.format(str(coin['symbol']))),
+        'del_coin': InlineKeyboardButton(text=vu.get_text('b_del_coin', settings), callback_data="remove_coin {} {}".format(str(coin['symbol']), from_view)),
+        'add_coin': InlineKeyboardButton(text=vu.get_text('b_add_coin', settings), callback_data="add_to_wallet {} {}".format(str(coin['symbol']), from_view)),
+        'update'  : InlineKeyboardButton(text=vu.get_text('b_update', settings), callback_data="coin {} {}".format(str(coin['symbol']), from_view)),
         # Back buttons
         "wallet"    : InlineKeyboardButton(text=vu.get_text('b_back_wallet', settings), callback_data='wallet'),
         "top_10"    : InlineKeyboardButton(text=vu.get_text('b_back_top_10', settings), callback_data='top_10')
