@@ -56,7 +56,6 @@ class Controller:
     def text_messages(self, bot, update):
         user_id = update.message.chat_id
         settings = self.mongo.get_user_settings(user_id)
-        print('add coin: {}\nsearch coin: {}'.format(self.mongo.is_add_coin(user_id), self.mongo.is_search(user_id)))
 
         if self.mongo.is_add_coin(user_id=user_id):
             symbol = update.message.text.upper()

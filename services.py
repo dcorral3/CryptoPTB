@@ -2,47 +2,28 @@ import requests
 import json
 from pymongo import MongoClient
 import config as conf
-from datetime import datetime
 from graph import Graph
-
-
-def clear_coin_list(coins=None):
-    coin_list = []
-    for coin in coins:
-        my_dict = {'_id': coin['id'], 'name': coin['name'], 'symbol': coin['symbol']}
-        coin_list.append(my_dict)
-    return coin_list
-
-
-def url_generator(coin=None, ):
-    # https://api.coinmarketcap.com/v2/ticker/1/?convert=EUR
-    url = "https://api.coinmarketcap.com/v2/ticker/" + str(coin["_id"]) + "/?convert=EUR"
-    return url, coin["symbol"]
-
+import service_utils as su
+from datetime import datetime
+from pprint import pprint
 
 class Mongodb:
 
     def __init__(self):
-        self.coinsTop10 = requests.get("https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10").json()["data"]
-        self.coins = requests.get("https://api.coinmarketcap.com/v2/listings/").json()["data"]
-        self.coinsTop10 = clear_coin_list(self.coinsTop10)
-        self.coins = clear_coin_list(self.coins)
+        self.coins = requests.get(su.url_generator(url_type='all_coins')).json()['data']
+        self.coins = su.clear_cmc_list(self.coins)
         self.db = MongoClient(
             host=conf.host,
             username=conf.username,
             password=conf.password,
             authSource=conf.authSource
         )[conf.authSource]
-
         try:
-            self.db.coinsTop10.drop()
-            self.db.coinsTop10.insert(self.coinsTop10)
             self.db.coins.drop()
             self.db.coins.insert(self.coins)
         except Exception as e:
             print("DB Error: ", str(e))
         finally:
-            self.top10coins = list(self.db.coinsTop10.find())
             self.coinList = list(self.db.coins.find())
 
 
@@ -61,10 +42,8 @@ class Mongodb:
         self.db.users.update_one({'_id': user_id}, {'$addToSet': {'wallet': coin}}, upsert=True)
 
     def get_top_10(self):
-        return self.top10coins
-
-    def get_all_coins(self):
-        return self.coinList
+        data = requests.get(su.url_generator(url_type='top_10')).json()["data"]
+        return su.clear_cmc_list(data)
 
     def get_wallet(self, user_id=None):
         data = self.db.users.find({"_id": user_id}, {"_id": 0})
@@ -75,31 +54,28 @@ class Mongodb:
         return self.db.coins.find_one({"symbol": symbol})
 
     def get_coin(self, symbol, settings):
+        currency = settings['currency']
+        # CryptoCompare
+        url_cc = su.url_generator(url_type='cc_single_coin', symbol=symbol, currency=currency)
+        req_cc = requests.get(url_cc)
+        data_cc = req_cc.json()["RAW"][symbol][currency]
+
+        # CoinMarketCap
         coin_obj = self.db.coins.find_one({'symbol': symbol})
-        url, symbol = url_generator(coin=coin_obj)
-        req = requests.get(url)
-        data = req.json()["data"]
-        if req.status_code == 200 and coin_obj:
-            if settings['currency'] == 'EUR':
-                value = data['quotes']['EUR']['price']
-            else:
-                value = data['quotes']['USD']['price']
-            percent_change_1h = data['quotes']['USD']['percent_change_1h']
-            percent_change_24h = data['quotes']['USD']['percent_change_24h']
-            percent_change_7d = data['quotes']['USD']['percent_change_7d']
-            update_time = datetime.fromtimestamp(
-                data['last_updated']
-            ).strftime("%H:%M:%S")
-            coin = {'name': coin_obj['name'],
-                    'symbol': symbol,
-                    'value': str(value),
-                    'time': update_time,
-                    'percent_change_1h': percent_change_1h,
-                    'percent_change_24h': percent_change_24h,
-                    'percent_change_7d': percent_change_7d}
+        coin_id = coin_obj['_id']
+        url_cmc = su.url_generator(url_type='cmc_single_coin', coin_id=coin_id, currency=currency)
+        req_cmc = requests.get(url_cmc)
+        data_cmc = req_cmc.json()['data']
+
+        if req_cc.status_code == 200 and req_cmc.status_code == 200:
+            coin_cc = su.parse_coin_cc(data=data_cc, currency=currency)
+            coin_cmc = su.parse_coin_cmc(data=data_cmc, currency=currency)
+            coin = coin_cc
+            coin.update(coin_cmc)
+            return coin
         else:
-            coin = None
-        return coin
+            print("error coin")
+            return None
 
     def remove_coin(self, user_id=None, coin=None):
         self.db.users.update_one({'_id': user_id}, {'$pull': {'wallet': coin}})
@@ -134,14 +110,7 @@ class Mongodb:
         return data
 
     def get_graph(self, graph_type, symbol, currency):
-        url = {
-            'hour_graph'  : "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=59",
-            'day_graph'   : "https://min-api.cryptocompare.com/data/histominute?fsym="+symbol+"&tsym="+currency+"&limit=1440",
-            'week_graph'  : "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=168",
-            'month_graph' : "https://min-api.cryptocompare.com/data/histohour?fsym="+symbol+"&tsym="+currency+"&limit=720"
-        }
-
-        data = requests.get(url[graph_type]).json()['Data']
+        data = requests.get(su.url_generator(url_type=graph_type, symbol=symbol, currency=currency)).json()['Data']
         list_values = []
         list_dates = []
         max_value = min_value = max_date = min_date = None
