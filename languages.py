@@ -10,6 +10,7 @@ LANG = {
         'language'           : 'Choose your preferred lenguage: ',
         'currency'           : 'Choose the currency in which you want the values ​​to be sent:',
         'coin'               : '{}:\t{} {}\n\nLast hour: {}%{}\nLast 24 hours: {}%{}\nLast week: {}%{}\n\nLast update: {}',
+        'help'               : 'Send me the /start command to go back to the main menu',
         # Main menu
         'b_wallet'           : "💰 Wallet",
         'b_search'           : "🔍 Search coin",
@@ -57,6 +58,7 @@ LANG = {
         'language'           : 'Elige tu idioma: ',
         'currency'           : 'Elige la moneda en la que quieres que te envíe los valores:',
         'coin'               : '{}:\t{} {}\n\nUltima hora: {}%{}\nÚltimas 24 horas: {}%{}\nÚltima semana: {}%{}\n\nÚltima actualización: {}',
+        'help'               : 'Mándame el comando /start para volver al menu principal',
         # Main menu
         'b_wallet'           : "💰 Cartera",
         'b_search'           : "🔍 Buscar moneda",

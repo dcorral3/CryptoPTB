@@ -14,7 +14,7 @@ def clear_coin_list(coins=None):
     return coin_list
 
 
-def url_generator(coin=None):
+def url_generator(coin=None, ):
     # https://api.coinmarketcap.com/v2/ticker/1/?convert=EUR
     url = "https://api.coinmarketcap.com/v2/ticker/" + str(coin["_id"]) + "/?convert=EUR"
     return url, coin["symbol"]

@@ -75,5 +75,5 @@ class View:
     def get_hide_button(self, settings):
         return keyboards.get_hide_button(settings)
 
-    def get_help(self):
-        return ViewObject(text="help!")
+    def get_help(self, settings):
+        return ViewObject(text=vu.get_text('help', settings))

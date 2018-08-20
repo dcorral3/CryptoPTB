@@ -56,6 +56,7 @@ class Controller:
     def text_messages(self, bot, update):
         user_id = update.message.chat_id
         settings = self.mongo.get_user_settings(user_id)
+        print('add coin: {}\nsearch coin: {}'.format(self.mongo.is_add_coin(user_id), self.mongo.is_search(user_id)))
 
         if self.mongo.is_add_coin(user_id=user_id):
             symbol = update.message.text.upper()
@@ -65,10 +66,10 @@ class Controller:
                     self.mongo.add_coin_to_user(user_id, coin)
                     data = self.mongo.get_wallet(user_id)
                     view = self.view.get_wallet(command="wallet", data=data, settings=settings)
-                    self.mongo.update_context(user_id, "add_coin")
                 else:
                     view = self.view.get_search_error(command="add_coin", settings=settings)
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
+                self.mongo.update_context(user_id, "add_coin")
             except Exception as e:
                 print("EXCEPTION ADDING COIN")
                 print(str(e))
@@ -80,24 +81,23 @@ class Controller:
                     data = self.mongo.get_coin(symbol, settings)
                     in_wallet = self.mongo.in_wallet(user_id, data)
                     view = self.view.get_coin("start", data, settings, in_wallet)
-                    self.mongo.update_context(user_id, "search_coin")
                 else:
                     view = self.view.get_search_error(command="search_coin", settings=settings)
+                self.mongo.update_context(user_id, "search_coin")
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:
                 print("EXCEPTION SEARCHING")
                 print(str(e))
 
         else:
-            view = self.view.get_help()
-            update.message.reply_text(view.text, reply_markup=view.keyboard)
+            view = self.view.get_help(settings)
+            update.message.reply_text(text=view.text)
 
     # Buttons
     def button(self, bot, update):
         query = update.callback_query
         command = query.data
         user_id = query.message.chat_id
-        old_text = query.message.text
         settings = self.mongo.get_user_settings(user_id)
         view = None
 
