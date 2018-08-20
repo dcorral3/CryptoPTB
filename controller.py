@@ -65,9 +65,9 @@ class Controller:
                     self.mongo.add_coin_to_user(user_id, coin)
                     data = self.mongo.get_wallet(user_id)
                     view = self.view.get_wallet(command="wallet", data=data, settings=settings)
+                    self.mongo.update_context(user_id, "add_coin")
                 else:
                     view = self.view.get_search_error(command="add_coin", settings=settings)
-                self.mongo.update_context(user_id, "add_coin")
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:
                 print("EXCEPTION ADDING COIN")
@@ -80,9 +80,9 @@ class Controller:
                     data = self.mongo.get_coin(symbol, settings)
                     in_wallet = self.mongo.in_wallet(user_id, data)
                     view = self.view.get_coin("start", data, settings, in_wallet)
+                    self.mongo.update_context(user_id, "search_coin")
                 else:
                     view = self.view.get_search_error(command="search_coin", settings=settings)
-                self.mongo.update_context(user_id, "search_coin")
                 update.message.reply_text(view.text, reply_markup=view.keyboard)
             except Exception as e:
                 print("EXCEPTION SEARCHING")
@@ -212,10 +212,10 @@ class Controller:
             view = self.view.get_start(settings)
         else:
             data = ""
-        if view and old_text != view.text:
-            bot.edit_message_text(text=view.text, chat_id=user_id,
-                                  message_id=query.message.message_id,
-                                  reply_markup=view.keyboard)
+        try:
+            bot.edit_message_text(text=view.text, chat_id=user_id,message_id=query.message.message_id,reply_markup=view.keyboard)
+        except Exception as e:
+            print(str(e))
         bot.answer_callback_query(query.id, text=view.feedback)
 
     def save_graph(self, graph_type, symbol, currency, text_title, user_id):

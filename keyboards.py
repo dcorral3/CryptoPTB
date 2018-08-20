@@ -110,7 +110,8 @@ def get_coin(from_view=None, coin=None, settings=None, in_wallet=None):
         'update'  : InlineKeyboardButton(text=vu.get_text('b_update', settings), callback_data="coin {} {}".format(str(coin['symbol']), from_view)),
         # Back buttons
         "wallet"    : InlineKeyboardButton(text=vu.get_text('b_back_wallet', settings), callback_data='wallet'),
-        "top_10"    : InlineKeyboardButton(text=vu.get_text('b_back_top_10', settings), callback_data='top_10')
+        "top_10"    : InlineKeyboardButton(text=vu.get_text('b_back_top_10', settings), callback_data='top_10'),
+        "start"    : InlineKeyboardButton(text=vu.get_text('b_back_start', settings), callback_data='start')
     }
     keyboard=[
                 [button['hour'], button['day']],
