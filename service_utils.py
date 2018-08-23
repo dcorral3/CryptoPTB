@@ -3,6 +3,7 @@ from pprint import pprint
 
 def parse_coin_cc(data=None, currency='USD'):
     update_time = datetime.fromtimestamp(data['LASTUPDATE']).strftime("%H:%M:%S")
+
     coin = {
             'symbol': data['FROMSYMBOL'],
             'value': data['PRICE'],
@@ -11,15 +12,19 @@ def parse_coin_cc(data=None, currency='USD'):
     return coin
 
 def parse_coin_cmc(data=None, currency='USD'):
-    _coin = data['quotes'][currency]
-    name = data['name']
-    percent_change_1h = _coin['percent_change_1h']
+    _coin              = data['quotes'][currency]
+
+    name               = data['name']
+    percent_change_1h  = _coin['percent_change_1h']
     percent_change_24h = _coin['percent_change_24h']
-    percent_change_7d = _coin['percent_change_7d']
-    coin = {'name': name,
+    percent_change_7d  = _coin['percent_change_7d']
+
+    coin = {
+            'name': name,
             'percent_change_1h': percent_change_1h,
             'percent_change_24h': percent_change_24h,
-            'percent_change_7d': percent_change_7d}
+            'percent_change_7d': percent_change_7d
+           }
     return coin
 
 def clear_cmc_list(coins=None):
