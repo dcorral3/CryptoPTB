@@ -79,10 +79,15 @@ def get_currency(settings):
     button={
         'usd'           : InlineKeyboardButton(text='USD', callback_data='db currency USD'),
         'eur'           : InlineKeyboardButton(text='EUR', callback_data='db currency EUR'),
+        'gbp'           : InlineKeyboardButton(text='GBP', callback_data='db currency GBP'),
+        'jpy'           : InlineKeyboardButton(text='JPY', callback_data='db currency JPY'),
+        'aud'           : InlineKeyboardButton(text='AUD', callback_data='db currency AUD'),
+        'hkd'           : InlineKeyboardButton(text='HKD', callback_data='db currency HKD'),
         "back_settings" : InlineKeyboardButton(text=vu.get_text('b_back_settings', settings), callback_data='settings')
     }
     keyboard=[
-                [button['usd'], button['eur']],
+                [button['usd'], button['eur'], button['gbp']],
+                [button['jpy'], button['aud'], button['hkd']],
                 [button['back_settings']]
              ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
