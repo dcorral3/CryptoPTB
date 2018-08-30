@@ -2,7 +2,7 @@ from datetime import datetime
 from pprint import pprint
 
 def parse_coin_cc(data=None, currency='USD'):
-    update_time = datetime.fromtimestamp(data['LASTUPDATE']).strftime("%H:%M:%S")
+    update_time = datetime.fromtimestamp(data['LASTUPDATE']).strftime('%Y-%m-%d %H:%M:%S')
 
     coin = {
             'symbol': data['FROMSYMBOL'],
