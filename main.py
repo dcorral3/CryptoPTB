@@ -15,6 +15,12 @@ dispatcher.add_handler(help_handler)
 add_coin_handler = CommandHandler('add_coin', controller.add_coin)
 dispatcher.add_handler(add_coin_handler)
 
+settings_handler = CommandHandler('settings', controller.settings)
+dispatcher.add_handler(settings_handler)
+
+search_coin_handler = CommandHandler('search_coin', controller.search_coin)
+dispatcher.add_handler(search_coin_handler)
+
 button_handler = CallbackQueryHandler(controller.button)
 dispatcher.add_handler(button_handler)
 

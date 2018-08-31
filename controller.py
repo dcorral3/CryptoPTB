@@ -50,6 +50,7 @@ class Controller:
                 settings = user['settings']
 
         self.mongo.insert_or_update_user(update.message.chat_id, wallet, settings)
+        self.mongo.reset_context(user_id)
         view = self.view.get_start(settings)
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
@@ -62,9 +63,21 @@ class Controller:
     def add_coin(self, bot, update):
         user_id = update.message.chat_id
         settings = self.mongo.get_user_settings(user_id)
-        view = self.view.get_add_coin(settings)
         self.mongo.update_context(user_id, 'add_coin')
         view = self.view.get_add_coin(settings)
+        update.message.reply_text(view.text, reply_markup=view.keyboard)
+
+    def settings(self, bot, update):
+        user_id = update.message.chat_id
+        settings = self.mongo.get_user_settings(user_id)
+        view = self.view.get_settings(settings)
+        update.message.reply_text(view.text, reply_markup=view.keyboard)
+
+    def search_coin(self, bot, update):
+        user_id = update.message.chat_id
+        settings = self.mongo.get_user_settings(user_id)
+        self.mongo.update_context(user_id, 'search_coin')
+        view = self.view.get_search(settings)
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
     def text_messages(self, bot, update):

@@ -95,6 +95,11 @@ class Mongodb:
             self.db.users.update_one({"_id": user_id}, {"$set": {"context.add_coin": False}})
             self.db.users.update_one({"_id": user_id}, {"$set": {"context.search_coin": False}})
 
+    def reset_context(self, user_id=None):
+        self.db.users.update_one({"_id": user_id}, {"$set": {"context.add_coin": False}})
+        self.db.users.update_one({"_id": user_id}, {"$set": {"context.search_coin": False}})
+
+
     def is_add_coin(self, user_id=None):
         return self.db.users.find_one({"_id": user_id})["context"]["add_coin"]
 
