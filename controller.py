@@ -80,6 +80,13 @@ class Controller:
         view = self.view.get_search(settings)
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
+    def wallet(self, bot, update):
+        user_id = update.message.chat_id
+        settings = self.mongo.get_user_settings(user_id)
+        data = self.mongo.get_wallet(user_id)
+        view = self.view.get_wallet(command='wallet', data=data, settings=settings)
+        update.message.reply_text(view.text, reply_markup=view.keyboard)
+
     def text_messages(self, bot, update):
         user_id = update.message.chat_id
         settings = self.mongo.get_user_settings(user_id)
