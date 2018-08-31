@@ -9,6 +9,9 @@ controller = Controller()
 start_handler = CommandHandler('start', controller.start)
 dispatcher.add_handler(start_handler)
 
+help_handler = CommandHandler('help', controller.help)
+dispatcher.add_handler(help_handler)
+
 button_handler = CallbackQueryHandler(controller.button)
 dispatcher.add_handler(button_handler)
 
