@@ -59,6 +59,14 @@ class Controller:
         view = self.view.get_help(settings)
         update.message.reply_text(view.text, reply_markup=view.keyboard)
 
+    def add_coin(self, bot, update):
+        user_id = update.message.chat_id
+        settings = self.mongo.get_user_settings(user_id)
+        view = self.view.get_add_coin(settings)
+        self.mongo.update_context(user_id, 'add_coin')
+        view = self.view.get_add_coin(settings)
+        update.message.reply_text(view.text, reply_markup=view.keyboard)
+
     def text_messages(self, bot, update):
         user_id = update.message.chat_id
         settings = self.mongo.get_user_settings(user_id)
