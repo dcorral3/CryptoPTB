@@ -7,7 +7,7 @@ LANG = {
         'search'             : 'Send me the coin short name, please. (e.j: BTC)',
         'search_error'       : '⚠️ Oops! I cant find this coin.',
         'settings'           : 'Your current settings:\n\nLanguage: {} \nCurrency: {}',
-        'language'           : 'Choose your preferred lenguage: ',
+        'language'           : 'Choose your preferred language: ',
         'currency'           : 'Choose the currency in which you want the values ​​to be sent:',
         'coin'               : '{}:\t{} {}\n\nLast hour: {}%{}\nLast 24 hours: {}%{}\nLast week: {}%{}\n\nLast update: {}',
         'help'               : 'Send me the /start command to go back to the main menu',
