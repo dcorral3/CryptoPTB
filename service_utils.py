@@ -52,13 +52,14 @@ def clear_cc_list(coins=None):
 
 def url_generator(url_type=None, symbol=None, coin_id=None, currency='USD'):
     url = {
-        'cc_single_coin' : "https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms={}".format(symbol, currency),
-        'cmc_single_coin': "https://api.coinmarketcap.com/v2/ticker/{}/?convert={}".format(coin_id, currency),
-        'top_10'         : "https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10",
-        'all_coins'      : "https://api.coinmarketcap.com/v2/listings/",
-        'hour_graph'     : "https://min-api.cryptocompare.com/data/histominute?fsym={}&tsym={}&limit=59".format(symbol, currency),
-        'day_graph'      : "https://min-api.cryptocompare.com/data/histominute?fsym={}&tsym={}&limit=1440".format(symbol, currency),
-        'week_graph'     : "https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=168".format(symbol, currency),
-        'month_graph'    : "https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=720".format(symbol, currency)
+        'cc_single_coin'  : "https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms={}".format(symbol, currency),
+        'cc_multiple_coin':"https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms={}".format(symbol, currency),
+        'cmc_single_coin' : "https://api.coinmarketcap.com/v2/ticker/{}/?convert={}".format(coin_id, currency),
+        'top_10'          : "https://api.coinmarketcap.com/v2/ticker/?structure=array&limit=10",
+        'all_coins'       : "https://api.coinmarketcap.com/v2/listings/",
+        'hour_graph'      : "https://min-api.cryptocompare.com/data/histominute?fsym={}&tsym={}&limit=59".format(symbol, currency),
+        'day_graph'       : "https://min-api.cryptocompare.com/data/histominute?fsym={}&tsym={}&limit=1440".format(symbol, currency),
+        'week_graph'      : "https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=168".format(symbol, currency),
+        'month_graph'     : "https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=720".format(symbol, currency)
     }
     return url[url_type]

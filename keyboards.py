@@ -3,10 +3,10 @@ import view_utils as vu
 
 def get_main_menu(settings=None):
     button={
-        "wallet"     : InlineKeyboardButton(text=vu.get_text('b_wallet', settings), callback_data='wallet'),
-        "top_10"     : InlineKeyboardButton(text="🔝 Top 10", callback_data='top_10'),
-        "search_coin": InlineKeyboardButton(text=vu.get_text('b_search', settings), callback_data='search_coin'),
-        "settings"   : InlineKeyboardButton(text=vu.get_text('b_settings', settings), callback_data='settings')
+        "wallet"      : InlineKeyboardButton(text=vu.get_text('b_wallet', settings), callback_data='wallet'),
+        "top_10"      : InlineKeyboardButton(text="🔝 Top 10", callback_data='top_10'),
+        "search_coin" : InlineKeyboardButton(text=vu.get_text('b_search', settings), callback_data='search_coin'),
+        "settings"    : InlineKeyboardButton(text=vu.get_text('b_settings', settings), callback_data='settings')
     }
     keyboard=[
                 [button['wallet'], button['top_10']],
@@ -17,10 +17,15 @@ def get_main_menu(settings=None):
 def get_wallet(command=None, data=None, settings=None):
     button={
         'add_coin'      : InlineKeyboardButton(text=vu.get_text('b_add_coin', settings), callback_data='add_coin'),
-        "back_start"    : InlineKeyboardButton(text=vu.get_text('b_back_start', settings), callback_data='start')
+        "back_start"    : InlineKeyboardButton(text=vu.get_text('b_back_start', settings), callback_data='start'),
+        "report": InlineKeyboardButton(text=vu.get_text('b_report', settings), callback_data='report')
     }
     columns = 2 if (len(data) > 3) else 1
     coin_key = vu.keyboard_generator(columns=columns, from_view=command, myList=data)
+
+    if len(data) > 0:
+        coin_key.append([button['report']])
+
     coin_key.append([button['add_coin']])
     coin_key.append([button['back_start']])
     return InlineKeyboardMarkup(inline_keyboard=coin_key)

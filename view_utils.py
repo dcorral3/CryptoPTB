@@ -1,7 +1,7 @@
 from languages import LANG
 from telegram import InlineKeyboardButton
 
-def get_text(obj_id, settings, coin=None, last_1h_i=None, last_24h_i=None, last_week_i=None):
+def get_text(obj_id, settings, coin=None, last_1h_i=None, last_24h_i=None, last_week_i=None, report=None):
     lang = settings['language']
     currency = settings['currency']
     if coin:
@@ -17,6 +17,13 @@ def get_text(obj_id, settings, coin=None, last_1h_i=None, last_24h_i=None, last_
                                             last_week_i,
                                             coin['time']
                                         )
+    if obj_id == 'report':
+        text = LANG[lang]['report_header']
+        body = ''
+        for item in report:
+            body += '<b>' + item['symbol'] + '</b>:    ' + item['percentaje'] + ' ' + item['icon'] + '\n'
+        return text + body
+
     return LANG[lang][obj_id].format(lang, currency)
 
 def coin_to_button(coin, from_view):

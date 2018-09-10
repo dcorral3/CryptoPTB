@@ -10,6 +10,7 @@ LANG = {
         'language'           : 'Choose your preferred language: ',
         'currency'           : 'Choose the currency in which you want the values ​​to be sent:',
         'coin'               : '{}:\t{} {}\n\nLast hour: {}%{}\nLast 24 hours: {}%{}\nLast week: {}%{}\n\nLast update: {}',
+        'report_header'      : 'Percentage changes in last 24 hours:\n\n',
         'help'               : 'Send me the /start command to go back to the main menu',
         # Main menu
         'b_wallet'           : "💰 Wallet",
@@ -18,6 +19,7 @@ LANG = {
         # Wallet
         'b_add_coin'         : "➕ Add coin",
         'b_del_coin'         : '❌ Remove coin',
+        'b_report'           : 'Report',
         # Back buttons
         'b_back_start'       : '« Back to main menu',
         'b_back_top_10'      : '« Back to Top 10',
@@ -58,6 +60,7 @@ LANG = {
         'language'           : 'Elige tu idioma: ',
         'currency'           : 'Elige la moneda en la que quieres que te envíe los valores:',
         'coin'               : '{}:\t{} {}\n\nUltima hora: {}%{}\nÚltimas 24 horas: {}%{}\nÚltima semana: {}%{}\n\nÚltima actualización: {}',
+        'report_header'      : 'Cambios porcentuales en las últimas 24 horas:\n\n',
         'help'               : 'Mándame el comando /start para volver al menu principal',
         # Main menu
         'b_wallet'           : "💰 Cartera",
@@ -66,7 +69,9 @@ LANG = {
         # Wallet
         'b_add_coin'         : "➕ Añadir moneda",
         'b_del_coin'         : "❌ Eliminar moneda",
-        # Back buttons
+        'b_report'           : 'Informe',
+
+    # Back buttons
         'b_back_start'       : '« Volver al menu principal',
         'b_back_top_10'      : '« Volver al Top 10',
         'b_back_wallet'      : '« Volver a tu Cartera',

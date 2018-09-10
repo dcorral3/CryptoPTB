@@ -59,8 +59,8 @@ class View:
 
     def get_coin(self, from_view=None, coin=None, settings=None, in_wallet=None, feedback=None):
         keyb        = keyboards.get_coin(from_view, coin, settings, in_wallet)
-        up_icon     = '🔺'
-        down_icon   = '🔻'
+        up_icon     = '😃'
+        down_icon   = '😡'
         last_1h     = coin['percent_change_1h']
         last_24h    = coin['percent_change_24h']
         last_week   = coin['percent_change_7d']
@@ -77,3 +77,20 @@ class View:
 
     def get_help(self, settings):
         return ViewObject(text=vu.get_text('help', settings))
+
+    def get_report(self, wallet, coins_data, settings):
+        keyb = keyboards.get_hide_button(settings)
+        up_icon = '😃'
+        down_icon = '😡'
+        report = []
+        for coin in wallet:
+            percentaje = coins_data[coin['symbol']][settings['currency']]['CHANGEPCT24HOUR']
+            last_24h_i = down_icon if percentaje < 0 else up_icon
+            item = {
+                'symbol': coin['symbol'],
+                'percentaje': str('%.3f' % round(percentaje, 3)),
+                'icon': last_24h_i
+            }
+            report.append(item)
+        text = vu.get_text('report', settings=settings, report=report)
+        return ViewObject(text=text, keyboard=keyb)

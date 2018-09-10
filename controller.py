@@ -1,4 +1,6 @@
 # coding=utf-8
+import telegram
+
 from views import View
 from services import Mongodb
 import view_utils as vu
@@ -212,8 +214,14 @@ class Controller:
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
             bot.answer_callback_query(query.id)
+        elif command == 'report':
+            wallet = self.mongo.get_wallet(user_id)
+            coins_data = self.mongo.get_coins_data(wallet, settings)
+            view_report = self.view.get_report(wallet, coins_data, settings)
+            bot.send_message(chat_id=user_id, text=view_report.text, reply_markup=view_report.keyboard, parse_mode=telegram.ParseMode.HTML)
+            bot.answer_callback_query(query.id)
         elif command == 'hide':
-            bot.delete_message(chat_id=user_id,message_id=query.message.message_id)
+            bot.delete_message(chat_id=user_id, message_id=query.message.message_id)
         elif command == "top_10":
             data = self.mongo.get_top_10()
             view = self.view.get_top_10(command=command, data=data, settings=settings)

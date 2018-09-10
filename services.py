@@ -140,3 +140,16 @@ class Mongodb:
     def in_wallet(self, user_id, coin):
         wallet=self.db.users.find_one({'_id': user_id}, {'_id': 0, 'wallet': {'$elemMatch': {'symbol': coin['symbol']}}})
         return wallet != {}
+
+    def get_all_users(self):
+        users = self.db.users.find()
+        return list(users)
+
+    def get_coins_data(self, wallet, settings):
+        symbols = ''
+        for coin in wallet:
+            symbols += coin['symbol'] + ','
+        data = requests.get(su.url_generator(url_type='cc_multiple_coin',
+                                             symbol=symbols,
+                                             currency=settings['currency'])).json()['RAW']
+        return data
