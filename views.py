@@ -85,10 +85,16 @@ class View:
         report = []
         for coin in wallet:
             percentaje = coins_data[coin['symbol']][settings['currency']]['CHANGEPCT24HOUR']
+            low24h = coins_data[coin['symbol']][settings['currency']]['LOW24HOUR']
+            high24h = coins_data[coin['symbol']][settings['currency']]['HIGH24HOUR']
+            price = coins_data[coin['symbol']][settings['currency']]['PRICE']
             last_24h_i = down_icon if percentaje < 0 else up_icon
             item = {
                 'symbol': coin['symbol'],
                 'percentaje': str('%.3f' % round(percentaje, 3)),
+                'low24h': low24h,
+                'high24h': high24h,
+                'price': price,
                 'icon': last_24h_i
             }
             report.append(item)

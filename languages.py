@@ -10,7 +10,7 @@ LANG = {
         'language'           : 'Choose your preferred language: ',
         'currency'           : 'Choose the currency in which you want the values ​​to be sent:',
         'coin'               : '{}:\t{} {}\n\nLast hour: {}%{}\nLast 24 hours: {}%{}\nLast week: {}%{}\n\nLast update: {}',
-        'report_header'      : 'Percentage changes in last 24 hours:\n\n',
+        'report_header'      : 'This is your report of the last 24 hours:\n\n',
         'help'               : 'Send me the /start command to go back to the main menu',
         # Main menu
         'b_wallet'           : "💰 Wallet",
@@ -47,7 +47,14 @@ LANG = {
         'feed_coin_removed'  : 'Coin removed from your Wallet',
         # Language
         'b_english'          : '🇬🇧 English',
-        'b_spanish'          : '🇪🇸 Spanish'
+        'b_spanish'          : '🇪🇸 Spanish',
+        # Report
+        'report_percentaje'  : 'Variance:',
+        'report_price'       : 'Actual value:',
+        'report_low24h'      : 'Low value:',
+        'report_high24h'     : 'High value:',
+        'report_balance_up'  : 'Your report balance is positive 🤙',
+        'report_balance_down': 'Your report balance is negative 😢'
     },
     'SPA': {
         # Response texts
@@ -60,7 +67,7 @@ LANG = {
         'language'           : 'Elige tu idioma: ',
         'currency'           : 'Elige la moneda en la que quieres que te envíe los valores:',
         'coin'               : '{}:\t{} {}\n\nUltima hora: {}%{}\nÚltimas 24 horas: {}%{}\nÚltima semana: {}%{}\n\nÚltima actualización: {}',
-        'report_header'      : 'Cambios porcentuales en las últimas 24 horas:\n\n',
+        'report_header'      : 'Este es tu informe de las últimas 24 horas:\n\n',
         'help'               : 'Mándame el comando /start para volver al menu principal',
         # Main menu
         'b_wallet'           : "💰 Cartera",
@@ -71,7 +78,7 @@ LANG = {
         'b_del_coin'         : "❌ Eliminar moneda",
         'b_report'           : 'Informe',
 
-    # Back buttons
+        # Back buttons
         'b_back_start'       : '« Volver al menu principal',
         'b_back_top_10'      : '« Volver al Top 10',
         'b_back_wallet'      : '« Volver a tu Cartera',
@@ -98,6 +105,13 @@ LANG = {
         'feed_coin_removed'  : 'La moneda ha sido eliminada de tu Cartera',
         # Languages
         'b_english'          : '🇬🇧 Inglés',
-        'b_spanish'          : '🇪🇸 Español'
+        'b_spanish'          : '🇪🇸 Español',
+        # Report
+        'report_percentaje'  : 'Variación:',
+        'report_price'       : 'Valor actual:',
+        'report_low24h'      : 'Valor mínimo:',
+        'report_high24h'     : 'Valor máximo:',
+        'report_balance_up'  : 'Tu balance del informe es positivo 🤙',
+        'report_balance_down': 'Tu balance del informe es negativo 😢'
     }
 }
