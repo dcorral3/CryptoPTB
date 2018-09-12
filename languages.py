@@ -19,7 +19,7 @@ LANG = {
         # Wallet
         'b_add_coin'         : "➕ Add coin",
         'b_del_coin'         : '❌ Remove coin',
-        'b_report'           : 'Report',
+        'b_report'           : '📋 Report',
         # Back buttons
         'b_back_start'       : '« Back to main menu',
         'b_back_top_10'      : '« Back to Top 10',
@@ -33,6 +33,8 @@ LANG = {
         # Settings
         'b_language'         : '🗣 Language',
         'b_currency'         : '💱 Currency',
+        'b_add_report'       : 'Subscribe to report',
+        'b_del_report'       : 'Unsubscribe from report',
         # Graphs
         'b_hour_graph'       : '📈 Last hour',
         'b_day_graph'        : '📈 Last 24h',
@@ -45,6 +47,8 @@ LANG = {
         # Feedback
         'feed_coin_added'    : 'Coin added successfully to your Wallet',
         'feed_coin_removed'  : 'Coin removed from your Wallet',
+        'feed_report_added'  : 'You are now subscribed to the daily report',
+        'feed_report_deleted': 'You are no longer subscribed to the daily report',
         # Language
         'b_english'          : '🇬🇧 English',
         'b_spanish'          : '🇪🇸 Spanish',
@@ -76,8 +80,7 @@ LANG = {
         # Wallet
         'b_add_coin'         : "➕ Añadir moneda",
         'b_del_coin'         : "❌ Eliminar moneda",
-        'b_report'           : 'Informe',
-
+        'b_report'           : '📋 Informe',
         # Back buttons
         'b_back_start'       : '« Volver al menu principal',
         'b_back_top_10'      : '« Volver al Top 10',
@@ -91,6 +94,8 @@ LANG = {
         # Settings
         'b_language'         : '🗣 Idioma',
         'b_currency'         : '💱 Moneda',
+        'b_add_report'       : 'Activar Informe',
+        'b_del_report'       : 'Desactivar Informe',
         # Graphs
         'b_hour_graph'       : '📈 Última hora',
         'b_day_graph'        : '📈 Últimas 24h',
@@ -103,6 +108,8 @@ LANG = {
         # Feedback
         'feed_coin_added'    : 'La moneda ha sido añadida con exito a tu Cartera',
         'feed_coin_removed'  : 'La moneda ha sido eliminada de tu Cartera',
+        'feed_report_added'  : 'Has activado el informe diario',
+        'feed_report_deleted': 'Has desactivado el informe diario',
         # Languages
         'b_english'          : '🇬🇧 Inglés',
         'b_spanish'          : '🇪🇸 Español',

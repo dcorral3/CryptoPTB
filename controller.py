@@ -6,7 +6,7 @@ from services import Mongodb
 import view_utils as vu
 import os
 import errno
-
+import pdb
 def clean_wallet(wallet):
     new_wallet = []
     for coin in wallet:
@@ -135,7 +135,6 @@ class Controller:
         user_id = query.message.chat_id
         settings = self.mongo.get_user_settings(user_id)
         view = None
-
         if "coin" in command:
             if command == "add_coin":
                 self.mongo.update_context(user_id, command)
@@ -229,7 +228,8 @@ class Controller:
             data = self.mongo.get_wallet(user_id)
             view = self.view.get_wallet(command=command, data=data, settings=settings)
         elif command == "settings":
-            view = self.view.get_settings(settings)
+            is_in_report = self.mongo.is_in_report(user_id)
+            view = self.view.get_settings(settings, is_in_report=is_in_report)
         elif command == "language":
             view = self.view.get_languaje(settings)
         elif command == "currency":
@@ -248,9 +248,15 @@ class Controller:
             self.mongo.update_settings(user_id, attribute, value)
             settings = self.mongo.get_user_settings(user_id)
             view = self.view.get_settings(settings)
-        elif command == "start" or "cancel_search":
+        elif command == "start" or command == "cancel_search":
             settings = self.mongo.get_user_settings(user_id)
             view = self.view.get_start(settings)
+        elif command == "add_report":
+            self.mongo.add_user_report(user_id)
+            view = self.view.get_settings(settings=settings, is_in_report=True, feedback='feed_report_added')
+        elif command == 'del_report':
+            self.mongo.del_user_report(user_id)
+            view = self.view.get_settings(settings=settings, is_in_report=False, feedback='feed_report_deleted')
         else:
             data = ""
         try:

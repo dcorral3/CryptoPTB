@@ -153,3 +153,13 @@ class Mongodb:
                                              symbol=symbols,
                                              currency=settings['currency'])).json()['RAW']
         return data
+
+    def add_user_report(self, user_id):
+        self.db.report.insert_one({'_id': user_id})
+
+    def del_user_report(self, user_id):
+        self.db.report.remove({'_id': user_id})
+
+    def is_in_report(self, user_id):
+        user = self.db.report.find_one({"_id": user_id})
+        return user is not None

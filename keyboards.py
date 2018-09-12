@@ -18,7 +18,7 @@ def get_wallet(command=None, data=None, settings=None):
     button={
         'add_coin'      : InlineKeyboardButton(text=vu.get_text('b_add_coin', settings), callback_data='add_coin'),
         "back_start"    : InlineKeyboardButton(text=vu.get_text('b_back_start', settings), callback_data='start'),
-        "report": InlineKeyboardButton(text=vu.get_text('b_report', settings), callback_data='report')
+        "report"        : InlineKeyboardButton(text=vu.get_text('b_report', settings), callback_data='report')
     }
     columns = 2 if (len(data) > 3) else 1
     coin_key = vu.keyboard_generator(columns=columns, from_view=command, myList=data)
@@ -59,16 +59,22 @@ def get_search_error(command=None, settings=None):
             ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
-def get_settings(settings=None):
+def get_settings(settings=None, is_in_report=None):
     button={
         "language"      : InlineKeyboardButton(text=vu.get_text('b_language', settings), callback_data='language'),
         "currency"      : InlineKeyboardButton(text=vu.get_text('b_currency', settings), callback_data='currency'),
+        "add_report"    : InlineKeyboardButton(text=vu.get_text('b_add_report', settings), callback_data='add_report'),
+        "del_report"    : InlineKeyboardButton(text=vu.get_text('b_del_report', settings), callback_data='del_report'),
         "back_start"    : InlineKeyboardButton(text=vu.get_text('b_back_start', settings), callback_data='start')
     }
     keyboard=[
                 [button['language'], button['currency']],
+                [button['del_report']],
                 [button['back_start']]
             ]
+
+    if not is_in_report:
+        keyboard[1]=[button['add_report']]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 def get_add_coin(settings=None):

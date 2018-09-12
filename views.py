@@ -37,10 +37,12 @@ class View:
         text = vu.get_text('search_error', settings)
         return ViewObject(text=text, keyboard=keyb)
 
-    def get_settings(self, settings):
-        keyb = keyboards.get_settings(settings)
+    def get_settings(self, settings, is_in_report=None, feedback=None):
+        keyb = keyboards.get_settings(settings, is_in_report)
         text = vu.get_text('settings', settings)
-        return ViewObject(text=text, keyboard=keyb)
+        if feedback:
+            feedback = vu.get_text(feedback, settings)
+        return ViewObject(text=text, keyboard=keyb, feedback=feedback)
 
     def get_add_coin(self, settings):
         keyb = keyboards.get_add_coin(settings)
