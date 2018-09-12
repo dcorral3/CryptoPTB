@@ -146,6 +146,7 @@ class Mongodb:
         return list(users)
 
     def get_coins_data(self, wallet, settings):
+        print('Wallet:{}, {}\nSettings:{}, {}'.format(type(wallet), wallet, type(settings), settings))
         symbols = ''
         for coin in wallet:
             symbols += coin['symbol'] + ','
@@ -163,3 +164,7 @@ class Mongodb:
     def is_in_report(self, user_id):
         user = self.db.report.find_one({"_id": user_id})
         return user is not None
+
+    def get_users_report(self):
+        users = self.db.report.find()
+        return list(users)

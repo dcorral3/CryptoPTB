@@ -6,7 +6,7 @@ from services import Mongodb
 import view_utils as vu
 import os
 import errno
-import pdb
+
 def clean_wallet(wallet):
     new_wallet = []
     for coin in wallet:
