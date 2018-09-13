@@ -213,6 +213,18 @@ class Controller:
                            reply_markup=keyb)
             silentremove('graphs/'+str(user_id)+'.png')
             bot.answer_callback_query(query.id)
+        elif "advanced_graph" in command:
+            graph_type = command.split()[0]
+            symbol = command.split()[1]
+            currency = settings['currency']
+            text_title = vu.get_text('advance_graph_title', settings)
+            self.save_graph(graph_type, symbol, currency, text_title, user_id)
+            keyb = self.view.get_hide_button(settings)
+            bot.send_photo(chat_id=user_id,
+                           photo=open('graphs/' + str(user_id) + '.png', 'rb'),
+                           reply_markup=keyb)
+            silentremove('graphs/'+str(user_id)+'.png')
+            bot.answer_callback_query(query.id)
         elif command == 'report':
             wallet = self.mongo.get_wallet(user_id)
             coins_data = self.mongo.get_coins_data(wallet, settings)
@@ -266,6 +278,11 @@ class Controller:
         bot.answer_callback_query(query.id, text=view.feedback)
 
     def save_graph(self, graph_type, symbol, currency, text_title, user_id):
-        graph = self.mongo.get_graph(graph_type, symbol, currency)
-        graph.title = text_title
-        graph.save_graph_png(user_id)
+        if graph_type == 'advanced_graph':
+            graph = self.mongo.get_advanced_graph(graph_type, symbol, currency)
+            graph.title = text_title
+            graph.save_advanced_graph_png(user_id)
+        else:
+            graph = self.mongo.get_graph(graph_type, symbol, currency)
+            graph.title = text_title
+            graph.save_graph_png(user_id)

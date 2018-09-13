@@ -3,11 +3,15 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator, HourLocator, MinuteLocator, DateFormatter
 import os
+import matplotlib.lines as mlines
 import view_utils as vu
 
 class Graph:
 
-    def __init__(self, title=None, graph_type=None, symbol=None, currency=None, list_values=[], list_dates=[], max_value=None, min_value=None, max_date=None, min_date=None):
+    def __init__(self, title=None, graph_type=None, symbol=None,
+                 currency=None, list_values=[], list_dates=[],
+                 max_value=None, min_value=None, max_date=None,
+                 min_date=None, data_frame=None):
         self.title       = title
         self.type        = graph_type
         self.currency    = currency
@@ -18,6 +22,42 @@ class Graph:
         self.min_value   = min_value
         self.max_date    = max_date
         self.min_date    = min_date
+        self.df  = data_frame
+
+    def save_advanced_graph_png(self, user_id):
+        fig, ax = plt.subplots()
+
+        plt.plot('datetime', 'macd', data=self.df, color='orange', linewidth=2)
+        plt.plot('datetime', 'macds', data=self.df, color='purple', linewidth=2)
+        plt.plot('datetime', 'high', data=self.df, color='blue', linewidth=2)
+
+        prev_short_mavg = self.df['macds'].shift(1)
+        prev_long_mavg = self.df['macd'].shift(1)
+        buys = self.df.ix[(self.df['macds'] <= self.df['macd']) & (prev_short_mavg >= prev_long_mavg)]
+        sells = self.df.ix[(self.df['macds'] >= self.df['macd']) & (prev_short_mavg <= prev_long_mavg)]
+
+        plt.ylabel(self.currency)
+
+        for buy in buys['datetime']:
+            plt.axvline(buy, color='g', linestyle='dotted')
+        for sell in sells['datetime']:
+            plt.axvline(sell, color='r', linestyle='dotted')
+
+        plt.plot('datetime', 'macds', '^', data=buys, markersize=5, color='g')
+        plt.plot('datetime', 'macds', 'v', data=sells, markersize=5, color='r')
+
+        plt.gcf().autofmt_xdate()
+        plt.title(self.title + ' (' + self.symbol + ')')
+
+        dotted_red = mlines.Line2D([], [], color='red', linestyle=':', markersize=15, label='Sell moment')
+        dotted_green = mlines.Line2D([], [], color='green', linestyle=':', markersize=15, label='Buy moment')
+
+        plt.legend(handles=[dotted_red, dotted_green])
+
+        if not os.path.exists('graphs'):
+            os.makedirs('graphs')
+
+        fig.savefig('graphs/' + str(user_id) + '.png')
 
     def save_graph_png(self, user_id):
 

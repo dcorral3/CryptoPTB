@@ -6,6 +6,8 @@ from graph import Graph
 import service_utils as su
 from datetime import datetime
 from pprint import pprint
+import pandas as pd
+from stockstats import StockDataFrame
 
 class Mongodb:
 
@@ -136,6 +138,20 @@ class Mongodb:
         return Graph(graph_type=graph_type, symbol=symbol, currency=currency,
                      list_values=list_values, list_dates=list_dates, max_value=max_value,
                      min_value=min_value, max_date=max_date, min_date=min_date)
+
+    def get_advanced_graph(self, graph_type, symbol, currency):
+        data = requests.get(su.url_generator(url_type=graph_type, symbol=symbol, currency=currency)).json()
+        df = pd.io.json.json_normalize(data, ['Data'])
+        df['datetime'] = pd.to_datetime(df.time, unit='s')
+        df = df[['datetime', 'low', 'high', 'open',
+                 'close', 'volumefrom', 'volumeto']]
+
+        df = StockDataFrame.retype(df)
+        df['macd'] = df.get('macd')  # calculate MACD
+        df.head()
+
+        return Graph(graph_type=graph_type, symbol=symbol, currency=currency, data_frame=df)
+
 
     def in_wallet(self, user_id, coin):
         wallet=self.db.users.find_one({'_id': user_id}, {'_id': 0, 'wallet': {'$elemMatch': {'symbol': coin['symbol']}}})

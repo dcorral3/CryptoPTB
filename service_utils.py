@@ -60,6 +60,7 @@ def url_generator(url_type=None, symbol=None, coin_id=None, currency='USD'):
         'hour_graph'      : "https://min-api.cryptocompare.com/data/histominute?fsym={}&tsym={}&limit=59".format(symbol, currency),
         'day_graph'       : "https://min-api.cryptocompare.com/data/histominute?fsym={}&tsym={}&limit=1440".format(symbol, currency),
         'week_graph'      : "https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=168".format(symbol, currency),
-        'month_graph'     : "https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=720".format(symbol, currency)
+        'month_graph'     : "https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=720".format(symbol, currency),
+        'advanced_graph'  : "https://min-api.cryptocompare.com/data/histoday?fsym={}&tsym={}&limit=180".format(symbol, currency)
     }
     return url[url_type]
